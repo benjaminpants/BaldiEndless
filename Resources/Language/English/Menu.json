@@ -1,0 +1,13 @@
+{"items":[
+
+{"key":"Men_Floor","value":"Floor: "},
+{"key":"Men_MainDesc","value":"Play an endless gauntlet of floors while trying to escape Baldi!\nHow many floors can you complete?"},
+{"key":"But_MainMode","value":"Arcade"},
+{"key":"But_FreeMode","value":"Freerun"},
+{"key":"Men_FreeDesc","value":"Explore any floor you've played in Arcade mode to your hearts content!"},
+
+{"key":"Men_Floor99Desc","value":"Can you beat the infamous Floor 99?\n<size=80%>(Completing this mode will NOT unlock Floors 1-99!)"},
+{"key":"But_Floor99","value":"99 Challenge"}
+
+
+]}

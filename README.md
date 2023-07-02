@@ -7,3 +7,5 @@ This mod adds an endless amount of floors to Baldi's Basics Plus!
 
 Put the BepInEx core DLLs and the MTM101BaldAPI dll into a folder named "Dependencies", it's likely it doesn't already exist so you need to create it.
 Load up the solution in Visual Studio and you should be able to build.
+
+The resources folder must be put in StreamingAssets/Modded and renamed to "mtm101.rulerp.baldiplus.endlessfloors".
