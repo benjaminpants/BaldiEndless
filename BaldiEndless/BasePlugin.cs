@@ -15,7 +15,7 @@ using UnityEngine.Rendering.Universal;
 namespace BaldiEndless
 {
 
-    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.0.0.0")]
+    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.0.0.1")]
 	public class EndlessFloorsPlugin : BaseUnityPlugin
 	{
 
@@ -98,6 +98,10 @@ namespace BaldiEndless
         {
             string allocatedPath = ModdedSaveSystem.GetCurrentSaveFolder(this);
             string highestFloorCountFile = Path.Combine(allocatedPath, "high.txt");
+            if (!File.Exists(highestFloorCountFile))
+            {
+                SaveHighestFloor();
+            }
             highestFloorCount = int.Parse(File.ReadAllText(highestFloorCountFile));
         }
 
