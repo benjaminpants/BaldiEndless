@@ -8,14 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using MTM101BaldAPI.SaveSystem;
-using AlmostEngine;
-using Unity.Mathematics;
-using UnityEngine.Rendering.Universal;
 
 namespace BaldiEndless
 {
 
-    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.0.0.1")]
+    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.0.1.0")]
 	public class EndlessFloorsPlugin : BaseUnityPlugin
 	{
 
@@ -691,7 +688,7 @@ namespace BaldiEndless
             __instance.ld.maxSideHallsToRemove = Mathf.FloorToInt(currentFD.classRoomCount / 5);
             __instance.ld.minSideHallsToRemove = Mathf.CeilToInt(currentFD.classRoomCount / 7);
 
-            __instance.ld.maxLightDistance = Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID),1,9);
+            __instance.ld.maxLightDistance = Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID / 3),1,9);
 
             float rgb = Mathf.Max(16f, 255f - (currentFD.FloorID * 6));
 
@@ -738,7 +735,7 @@ namespace BaldiEndless
 
             for (int i = 0; i < extraBuilders; i++)
             {
-                extraObjs.Add(WeightedObjectBuilder.RandomSelection(possibleExtraBuilders));
+                extraObjs.Add(WeightedObjectBuilder.ControlledRandomSelection(possibleExtraBuilders,rng));
             }
 
             __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
@@ -821,7 +818,7 @@ namespace BaldiEndless
                 new WeightedFieldTrip()
                 {
                     selection = EndlessFloorsPlugin.tripObjects.Find(x => x.trip == FieldTrips.Camping),
-                    weight = 50
+                    weight = 49
                 },
                 new WeightedFieldTrip()
                 {

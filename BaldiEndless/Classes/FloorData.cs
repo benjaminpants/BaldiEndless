@@ -106,7 +106,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.CeilToInt(classRoomCount * 1.5f);
+                return Mathf.CeilToInt((maxSize * 1.2f) - 24f);
             }
         }
 
@@ -114,7 +114,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.CeilToInt(classRoomCount * 1.2f);
+                return Mathf.CeilToInt(maxFacultyRoomCount * 0.88f);
             }
         }
 
