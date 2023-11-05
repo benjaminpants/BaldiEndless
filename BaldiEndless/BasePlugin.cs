@@ -8,13 +8,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using MTM101BaldAPI.SaveSystem;
+using BepInEx.Bootstrap;
+using System.Reflection;
+using UnityEngine.Rendering;
+using System.Collections;
 
 namespace BaldiEndless
 {
 
-    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.0.1.0")]
+    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.1.0.0")]
+    [BepInDependency(BBTimesID, BepInDependency.DependencyFlags.SoftDependency)]
 	public class EndlessFloorsPlugin : BaseUnityPlugin
 	{
+
+        public const string BBTimesID = "pixelguy.pixelmodding.baldiplus.bbextracontent";
 
         public SceneObject[] SceneObjects;
 
@@ -108,7 +115,18 @@ namespace BaldiEndless
             File.WriteAllText(Path.Combine(lastAllocatedPath, "hasdata.txt"), val ? "y" : "n");
         }
 
-        void SaveLoad(bool isSave, string allocatedPath)
+        //once again thank you chat gpt i HATE stupid stuff like this
+        public static void SetContentManager(string propertyName, object value, BindingFlags flags = BindingFlags.Public)
+        {
+            Type contentManagerType = Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.ContentManager");
+            object instance = contentManagerType.GetField("instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
+            Debug.Log(instance);
+            FieldInfo fo = contentManagerType.GetField(propertyName, flags);
+            Debug.Log(fo);
+            fo.SetValue(instance,value);
+        }
+
+        /*void SaveLoad(bool isSave, string allocatedPath)
         {
             lastAllocatedPath = allocatedPath;
             string playerDataPath = Path.Combine(allocatedPath,"EndlessSave.json");
@@ -136,7 +154,7 @@ namespace BaldiEndless
                     EndlessSaveSerializable serial = JsonUtility.FromJson<EndlessSaveSerializable>(File.ReadAllText(playerDataPath));
                 }
             }
-        }
+        }*/
 
         void SaveLoadHighestFloor(bool isSave, string allocatedPath)
         {
@@ -149,6 +167,8 @@ namespace BaldiEndless
                 LoadHighestFloor();
             }
         }
+
+        public static bool TimesInstalled => Chainloader.PluginInfos.ContainsKey(BBTimesID);
 
         void AddWeightedTextures(ref List<WeightedTexture2D> tex, string folder)
         {
@@ -172,7 +192,6 @@ namespace BaldiEndless
             Instance = this;
 			Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.endlessfloors");
             MTM101BaldiDevAPI.SavesEnabled = false;
-			harmony.PatchAll();
             string myPath = AssetManager.GetModPath(this);
             string iconPath = Path.Combine(myPath,"UpgradeIcons");
             foreach (string p in Directory.GetFiles(iconPath))
@@ -232,6 +251,19 @@ namespace BaldiEndless
 
             ModdedSaveSystem.AddSaveLoadAction(this, SaveLoadHighestFloor);
 
+            StartCoroutine(WaitTilAllLoaded(harmony));
+        }
+
+        private IEnumerator WaitTilAllLoaded(Harmony harmony)
+        {
+            FieldInfo loaded = AccessTools.Field(typeof(Chainloader), "_loaded");
+
+            while (!loaded.GetValue<bool>(null))
+            {
+                yield return null;
+            }
+            UnityEngine.Debug.Log("Patching NOW!");
+            harmony.PatchAllConditionals();
         }
 
         public void UpdateData(ref SceneObject sceneObject)
@@ -322,6 +354,22 @@ namespace BaldiEndless
 
         static void Postfix(NameManager __instance)
         {
+            // initialize items here because we need the references NOW god damn it!
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                // this code is actually awful and i should never be allowed to program again
+                // but i literally don't think there is a better way of doing this
+                Type contentManagerType = Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.ContentManager");
+                object instance = contentManagerType.GetField("instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
+                // i am in literal agony
+                contentManagerType.GetMethod("SetupItemWeights").Invoke(instance, null);
+                contentManagerType.GetMethod("SetupObjectBuilders").Invoke(instance, null);
+                contentManagerType.GetMethod("SetupBasicPrefabs").Invoke(instance, null);
+                contentManagerType.GetMethod("SetupExtraContent").Invoke(instance, null);
+                contentManagerType.GetMethod("SetupObjectBuilders").Invoke(instance, null);
+            }
+
+
             EndlessFloorsPlugin.Instance.SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
             EndlessFloorsPlugin.tripObjects = Resources.FindObjectsOfTypeAll<FieldTripObject>().Where(x => x.tripPre != null).ToList();
             EndlessFloorsPlugin.TheBladis = Resources.FindObjectsOfTypeAll<Baldi>().ToList();
@@ -488,6 +536,14 @@ namespace BaldiEndless
                     weight = 74
                 }
             };
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                EndlessFloorsPlugin.weightedItems.AddItem(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Hammer")),
+                    weight = 100
+                });
+            }
         }
     }
 
@@ -555,6 +611,20 @@ namespace BaldiEndless
             }*/
         }
     }
+
+
+    //this patch is only applied if BB Times is installed. If it is, tell it's "setup extra content" stuff to go fuck itself
+    /*[ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
+    [HarmonyPatch("SetupExtraContent")]
+    [HarmonyPatch("Prefix")]
+    class TimesGoAway
+    {
+        private static bool Prefix()
+        {
+            Console.WriteLine("BBTIMES GO AWAY!!!");
+            return false;
+        }
+    }*/
 
     [HarmonyPatch(typeof(LevelGenerator))]
     [HarmonyPatch("StartGenerate")]
@@ -811,7 +881,11 @@ namespace BaldiEndless
 
             __instance.ld.timeBonusVal = 1 * currentFD.FloorID;
 
-            __instance.ld.fieldTripItems = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2").levelObject.fieldTripItems; //TODO: DONT FUCKING DO THIS
+            // let times handle this one if its installed because well. i dont change this table, i have no reason to NOT let times take control over it
+            if (!EndlessFloorsPlugin.TimesInstalled)
+            {
+                __instance.ld.fieldTripItems = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2").levelObject.fieldTripItems; //TODO: DONT FUCKING DO THIS
+            }
 
             __instance.ld.fieldTrips = new WeightedFieldTrip[2]
             {
@@ -844,6 +918,14 @@ namespace BaldiEndless
             __instance.ld.classFloorTexs = EndlessFloorsPlugin.profFloorTextures.ToArray();
 
             __instance.ld.finalLevel = false; // THERE IS NO END
+            
+            //tell the post generator to fuck itself
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                // cease this torment
+                //EndlessFloorsPlugin.SetContentManager("CafeteriaItems", EndlessFloorsPlugin.weightedItems, BindingFlags.NonPublic);
+                EndlessFloorsPlugin.SetContentManager("allItems", EndlessFloorsPlugin.weightedItems.ToList(), BindingFlags.NonPublic | BindingFlags.Instance);
+            }
         }
     }
 }
