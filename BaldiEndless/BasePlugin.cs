@@ -16,8 +16,9 @@ using System.Collections;
 namespace BaldiEndless
 {
 
+    [BepInIncompatibility(BBTimesID)]
     [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.1.0.0")]
-    [BepInDependency(BBTimesID, BepInDependency.DependencyFlags.SoftDependency)]
+    //[BepInDependency(BBTimesID, BepInDependency.DependencyFlags.SoftDependency)]
 	public class EndlessFloorsPlugin : BaseUnityPlugin
 	{
 
@@ -168,7 +169,7 @@ namespace BaldiEndless
             }
         }
 
-        public static bool TimesInstalled => Chainloader.PluginInfos.ContainsKey(BBTimesID);
+        public static bool TimesInstalled => false;//Chainloader.PluginInfos.ContainsKey(BBTimesID);
 
         void AddWeightedTextures(ref List<WeightedTexture2D> tex, string folder)
         {
