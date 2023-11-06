@@ -785,18 +785,18 @@ namespace BaldiEndless
     //tell times that everything is available always
     [ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
     [HarmonyPatch("BB_MOD.Builders.TrapDoorBuilder, Baldi's Basics Times", "Build")]
-    class TimesCondPatch
+    class TimesTrapPatch
     {
         private static void Prefix(ObjectBuilder __instance, ref System.Random cRng)
         {
             Type floorEnumType = Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.Floors");
             Type DictionaryType = typeof(Dictionary<,>).MakeGenericType(floorEnumType, typeof(int[]));
 
-            int maxAllowed = Mathf.Max(Mathf.CeilToInt(EndlessFloorsPlugin.currentFloorData.scaleVar / 50f),1);
+            int maxAllowed = Mathf.Max(Mathf.CeilToInt(EndlessFloorsPlugin.currentFloorData.scaleVar / 45f),1);
 
-            int maxAllowedLinked = Mathf.Min(maxAllowed - cRng.Next(1, maxAllowed / 4), maxAllowed);
+            int maxAllowedLinked = Mathf.Min(maxAllowed - cRng.Next(1, Mathf.Max(maxAllowed / 4,2)), maxAllowed);
 
-            int maxAllowedRandom = Mathf.Max(maxAllowed - maxAllowedLinked, cRng.Next(1, maxAllowed / 6));
+            int maxAllowedRandom = Mathf.Max(maxAllowed - maxAllowedLinked, cRng.Next(1, Mathf.Max(maxAllowed / 6, 2)));
 
             int[] initialValue = new int[] { 1, maxAllowed, maxAllowedLinked, maxAllowedRandom };
 
