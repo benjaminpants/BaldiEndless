@@ -300,16 +300,16 @@ namespace BaldiEndless
         public override int MaxStack => 1;
     }
 
-    // Make Grappling hooks able to break windows
+    // Make Grappling hooks able to break windows(or doors if times is installed)
     public class GrappleBreakWindows : GameUpgrade
     {
-        public override int Cost => 250;
+        public override int Cost => EndlessFloorsPlugin.TimesInstalled ? 350 : 250;
 
         public override int SellPrice => 75;
 
-        public override string Description => "Upg_GrappleBreak";
+        public override string Description => EndlessFloorsPlugin.TimesInstalled ? "Upg_GrappleBreakDoor" : "Upg_GrappleBreak";
 
-        public override string[] Icons => new string[] { "GrappleBreak" };
+        public override string[] Icons => EndlessFloorsPlugin.TimesInstalled ? new string[] { "GrappleBreakDoor" } : new string[] { "GrappleBreak" };
 
         public override int MaxStack => 1;
     }

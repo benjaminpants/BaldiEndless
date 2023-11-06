@@ -12,15 +12,16 @@ using BepInEx.Bootstrap;
 using System.Reflection;
 using UnityEngine.Rendering;
 using System.Collections;
+using System.Xml.Linq;
 
 namespace BaldiEndless
 {
 
-    [BepInIncompatibility(BBTimesID)]
-    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors","Endless Floors","1.1.0.0")]
-    //[BepInDependency(BBTimesID, BepInDependency.DependencyFlags.SoftDependency)]
-	public class EndlessFloorsPlugin : BaseUnityPlugin
-	{
+    //[BepInIncompatibility(BBTimesID)]
+    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "2.0.0.0")]
+    [BepInDependency(BBTimesID, BepInDependency.DependencyFlags.SoftDependency)]
+    public class EndlessFloorsPlugin : BaseUnityPlugin
+    {
 
         public const string BBTimesID = "pixelguy.pixelmodding.baldiplus.bbextracontent";
 
@@ -64,6 +65,9 @@ namespace BaldiEndless
 
         public static Mode NNFloorMode = EnumExtensions.ExtendEnum<Mode>("Floor99");
 
+        public static string F99MusicStart = "";
+
+        public static string F99MusicLoop = "";
         public static FloorData currentFloorData => currentSave.currentFloorData;
 
         public bool hasSave = false; // UNUSED
@@ -96,7 +100,7 @@ namespace BaldiEndless
         {
             string allocatedPath = ModdedSaveSystem.GetCurrentSaveFolder(this);
             string highestFloorCountFile = Path.Combine(allocatedPath, "high.txt");
-            File.WriteAllText(highestFloorCountFile,highestFloorCount.ToString());
+            File.WriteAllText(highestFloorCountFile, highestFloorCount.ToString());
         }
 
         public void LoadHighestFloor()
@@ -124,7 +128,7 @@ namespace BaldiEndless
             Debug.Log(instance);
             FieldInfo fo = contentManagerType.GetField(propertyName, flags);
             Debug.Log(fo);
-            fo.SetValue(instance,value);
+            fo.SetValue(instance, value);
         }
 
         /*void SaveLoad(bool isSave, string allocatedPath)
@@ -169,7 +173,7 @@ namespace BaldiEndless
             }
         }
 
-        public static bool TimesInstalled => false;//Chainloader.PluginInfos.ContainsKey(BBTimesID);
+        public static bool TimesInstalled => Chainloader.PluginInfos.ContainsKey(BBTimesID);
 
         void AddWeightedTextures(ref List<WeightedTexture2D> tex, string folder)
         {
@@ -188,17 +192,17 @@ namespace BaldiEndless
             }
         }
 
-		void Awake()
-		{
+        void Awake()
+        {
             Instance = this;
-			Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.endlessfloors");
+            Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.endlessfloors");
             MTM101BaldiDevAPI.SavesEnabled = false;
             string myPath = AssetManager.GetModPath(this);
-            string iconPath = Path.Combine(myPath,"UpgradeIcons");
+            string iconPath = Path.Combine(myPath, "UpgradeIcons");
             foreach (string p in Directory.GetFiles(iconPath))
             {
                 Texture2D tex = AssetManager.TextureFromFile(p);
-                Sprite spr = AssetManager.SpriteFromTexture2D(tex,Vector2.one / 2f, 50f);
+                Sprite spr = AssetManager.SpriteFromTexture2D(tex, Vector2.one / 2f, 50f);
                 UpgradeIcons.Add(Path.GetFileNameWithoutExtension(p), spr);
             }
 
@@ -246,7 +250,7 @@ namespace BaldiEndless
 
             Sprite presentSprite = AssetManager.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
 
-            presentObject = ObjectCreatorHandlers.CreateItemObject("Itm_Present","Itm_Present", presentSprite, presentSprite, presentEnum, 9999, 26);
+            presentObject = ObjectCreatorHandlers.CreateItemObject("Itm_Present", "Itm_Present", presentSprite, presentSprite, presentEnum, 9999, 26);
 
             DontDestroyOnLoad(presentObject.item = new GameObject().AddComponent<ITM_Present>()); // WHAT THE FUCK THIS IS ACTUALLY VALID SYNTAX I WAS FUCKING JOKING
 
@@ -263,8 +267,16 @@ namespace BaldiEndless
             {
                 yield return null;
             }
-            UnityEngine.Debug.Log("Patching NOW!");
+
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                //harmony.Unpatch(typeof(LevelGenerator).GetMethod("StartGenerate"), HarmonyPatchType.Prefix, BBTimesID);
+                //harmony.Unpatch(typeof(LevelGenerator).GetMethod("Generate"), HarmonyPatchType.Transpiler, BBTimesID);
+                harmony.Unpatch(typeof(BaseGameManager).GetMethod("ElevatorClosed", BindingFlags.NonPublic | BindingFlags.Instance), HarmonyPatchType.Prefix, BBTimesID);
+                harmony.Unpatch(typeof(BaseGameManager).GetMethod("AllNotebooks", BindingFlags.NonPublic | BindingFlags.Instance), HarmonyPatchType.Prefix, BBTimesID);
+            }
             harmony.PatchAllConditionals();
+            //Debug.Log(Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.ContentManager").Assembly.FullName);
         }
 
         public void UpdateData(ref SceneObject sceneObject)
@@ -274,7 +286,7 @@ namespace BaldiEndless
             sceneObject.nextLevel = sceneObject;
             sceneObject.levelTitle = "F" + currentSave.currentFloorData.FloorID;
         }
-	}
+    }
 
     public class EndlessSave
     {
@@ -355,20 +367,10 @@ namespace BaldiEndless
 
         static void Postfix(NameManager __instance)
         {
-            // initialize items here because we need the references NOW god damn it!
-            if (EndlessFloorsPlugin.TimesInstalled)
-            {
-                // this code is actually awful and i should never be allowed to program again
-                // but i literally don't think there is a better way of doing this
-                Type contentManagerType = Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.ContentManager");
-                object instance = contentManagerType.GetField("instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
-                // i am in literal agony
-                contentManagerType.GetMethod("SetupItemWeights").Invoke(instance, null);
-                contentManagerType.GetMethod("SetupObjectBuilders").Invoke(instance, null);
-                contentManagerType.GetMethod("SetupBasicPrefabs").Invoke(instance, null);
-                contentManagerType.GetMethod("SetupExtraContent").Invoke(instance, null);
-                contentManagerType.GetMethod("SetupObjectBuilders").Invoke(instance, null);
-            }
+            string myPath = AssetManager.GetModPath(EndlessFloorsPlugin.Instance);
+            string midiPath = Path.Combine(myPath, "Midi");
+            EndlessFloorsPlugin.F99MusicStart = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
+            EndlessFloorsPlugin.F99MusicLoop = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
 
 
             EndlessFloorsPlugin.Instance.SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
@@ -384,7 +386,7 @@ namespace BaldiEndless
             EndlessFloorsPlugin.skyBoxes = Resources.FindObjectsOfTypeAll<Cubemap>().Where(x => x.name.Contains("Cubemap_")).ToArray();
             EndlessFloorsPlugin.Nametag = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Nametag);
             EndlessFloorsPlugin.NpcSpawns = Resources.FindObjectsOfTypeAll<NPC>().Where(
-                x => x.Character != Character.Baldi && !x.name.Contains("Grapple") && !(x.name == "Principal_AllKnowing")
+                x => x.Character != Character.Baldi && !x.name.Contains("Grapple") && !(x.name == "Principal_AllKnowing") && (x.Character != Character.Beans || x.gameObject.name == "Beans")
                 ).ToList();
             var npcs = EndlessFloorsPlugin.NpcSpawns;
             EndlessFloorsPlugin.currentSceneObject = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F3");
@@ -443,6 +445,77 @@ namespace BaldiEndless
                 weight = 70,
                 selection = npcs.Find(x => x.Character == Character.Prize)
             });
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 20,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Office Chair"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 30,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Happy Holidays"))
+                });
+
+                // This character is actually the worst Baldi character ever to be created, I've never even encountered him but
+                // his fundamental mechanic is just so god awful that I refuse to let him spawn in MY mod.
+                /*EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 40,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("SuperIntendent"))
+                });*/
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 45,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Crazy Clock"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 30,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Forgotten"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 60,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Let's Drum"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 20,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Robocam"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 60,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Pencil Boy"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 40,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Stunly"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 70,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Leapy"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 60,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Watcher"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 80,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Super Intendent Jr"))
+                });
+                EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
+                {
+                    weight = 90,
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Glue Boy"))
+                });
+            }
 
             EndlessFloorsPlugin.weightedItems = new WeightedItemObject[]
             {
@@ -539,12 +612,96 @@ namespace BaldiEndless
             };
             if (EndlessFloorsPlugin.TimesInstalled)
             {
-                EndlessFloorsPlugin.weightedItems.AddItem(new WeightedItemObject()
+                float moddedWeightReduction = 0.8f;
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
                 {
                     selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Hammer")),
-                    weight = 100
+                    weight = (int)(30 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("GPS")),
+                    weight = (int)(30 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Pencil")),
+                    weight = (int)(40 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("ScrewDriver")),
+                    weight = (int)(50 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("BearTrap")),
+                    weight = (int)(20 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Banana")),
+                    weight = (int)(65 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Gum")),
+                    weight = (int)(60 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Lockpick")),
+                    weight = (int)(37 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Speedpotion")),
+                    weight = (int)(22 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Bsed")),
+                    weight = (int)(30 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Gquarter")),
+                    weight = (int)(15 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Emptybottle")),
+                    weight = (int)(40 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Waterbottle")),
+                    weight = (int)(35 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Hardhat")),
+                    weight = (int)(30 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Headachepill")),
+                    weight = (int)(30 * moddedWeightReduction)
+                });
+                EndlessFloorsPlugin.weightedItems = EndlessFloorsPlugin.weightedItems.AddToArray(new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == EnumExtensions.GetFromExtendedName<Items>("Basketball")),
+                    weight = (int)(25 * moddedWeightReduction)
                 });
             }
+            /*EndlessFloorsPlugin.weightedItems = new WeightedItemObject[]
+            {
+                new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.GrapplingHook),
+                    weight = 60
+                },
+            };*/
         }
     }
 
@@ -576,7 +733,7 @@ namespace BaldiEndless
             {
                 if (EndlessFloorsPlugin.currentSave.hasClaimedFreeYTP) return;
                 EndlessFloorsPlugin.currentSave.hasClaimedFreeYTP = true;
-                Singleton<CoreGameManager>.Instance.AddPoints(FloorData.GetYTPsAtFloor(EndlessFloorsPlugin.Instance.selectedFloor - 1),0,false);
+                Singleton<CoreGameManager>.Instance.AddPoints(FloorData.GetYTPsAtFloor(EndlessFloorsPlugin.Instance.selectedFloor - 1), 0, false);
                 __instance.QueueShop();
             }
         }
@@ -614,18 +771,55 @@ namespace BaldiEndless
     }
 
 
-    //this patch is only applied if BB Times is installed. If it is, tell it's "setup extra content" stuff to go fuck itself
-    /*[ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
-    [HarmonyPatch("SetupExtraContent")]
-    [HarmonyPatch("Prefix")]
-    class TimesGoAway
+    //tell times that we are always on floor 1
+    [ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
+    [HarmonyPatch("BB_MOD.GenericExtensions, Baldi's Basics Times", "ToFloorIdentifier")]
+    class TimesFloor3Patch
     {
-        private static bool Prefix()
+        private static void Prefix(ref string name)
         {
-            Console.WriteLine("BBTIMES GO AWAY!!!");
-            return false;
+            name = "F1";
         }
-    }*/
+    }
+
+    //tell times that everything is available always
+    [ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
+    [HarmonyPatch("BB_MOD.Builders.TrapDoorBuilder, Baldi's Basics Times", "Build")]
+    class TimesCondPatch
+    {
+        private static void Prefix(ObjectBuilder __instance, ref System.Random cRng)
+        {
+            Type floorEnumType = Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.Floors");
+            Type DictionaryType = typeof(Dictionary<,>).MakeGenericType(floorEnumType, typeof(int[]));
+
+            int maxAllowed = Mathf.Max(Mathf.CeilToInt(EndlessFloorsPlugin.currentFloorData.scaleVar / 50f),1);
+
+            int maxAllowedLinked = Mathf.Min(maxAllowed - cRng.Next(1, maxAllowed / 4), maxAllowed);
+
+            int maxAllowedRandom = Mathf.Max(maxAllowed - maxAllowedLinked, cRng.Next(1, maxAllowed / 6));
+
+            int[] initialValue = new int[] { 1, maxAllowed, maxAllowedLinked, maxAllowedRandom };
+
+            object constDictionary = Activator.CreateInstance(DictionaryType, new object[] { }); //create a new dictionary
+
+            constDictionary
+                .GetType()
+                .GetMethod("Add", BindingFlags.Public | BindingFlags.Instance)
+                .Invoke(constDictionary, new object[] { Enum.ToObject(floorEnumType, 1), initialValue }); //add the thing
+
+            //set it
+            __instance
+                .GetType()
+                .GetField("trapdoorAmounts", BindingFlags.NonPublic | BindingFlags.Instance)
+                .SetValue(__instance, constDictionary);
+
+        }
+
+        private static void Finalizer(Exception __exception)
+        {
+            Debug.Log(__exception);
+        }
+    }
 
     [HarmonyPatch(typeof(LevelGenerator))]
     [HarmonyPatch("StartGenerate")]
@@ -633,9 +827,10 @@ namespace BaldiEndless
     {
         static void Prefix(LevelGenerator __instance)
         {
+            Debug.Log("Endless Floors PATCH!");
             FloorData currentFD = EndlessFloorsPlugin.currentFloorData;
             __instance.seedOffset = currentFD.FloorID;
-            __instance.ld.additionalNPCs = Mathf.Min(Mathf.RoundToInt((currentFD.FloorID / 1.3f) - 1), EndlessFloorsPlugin.weightedNPCs.Count);
+            __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.weightedNPCs.Count);
 
             System.Random rng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
 
@@ -680,7 +875,23 @@ namespace BaldiEndless
             __instance.ld.maxOffices = Mathf.Max(currentFD.maxOffices,1);
             __instance.ld.minOffices = 1;
 
-            __instance.ld.standardLightColor = currentFD.FloorID % 99 == 0 ? Color.red : Color.white;
+            //use the regular seed without the offset so it stays consistent
+            System.Random lightRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
+
+            Color warmColor = new Color(255f / 255f, 202 / 255f, 133 / 255f);
+            Color coldColor = new Color(133f / 255f, 161f / 255f, 255f / 255f);
+
+            float coldLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + rng.Next(-50,50))),0f);
+            float warmLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + rng.Next(-50, 50))), 0f);
+            Debug.Log(coldLight);
+            Debug.Log(warmLight);
+
+            __instance.ld.standardLightColor = Color.Lerp(Color.Lerp(Color.white, coldColor, coldLight), warmColor, warmLight);
+
+            if (currentFD.FloorID % 99 == 0)
+            {
+                __instance.ld.standardLightColor = Color.Lerp(__instance.ld.standardLightColor,Color.red,0.3f);
+            }
 
             __instance.ld.randomEvents = new List<WeightedRandomEvent>
             {
@@ -752,7 +963,7 @@ namespace BaldiEndless
 
             __instance.ld.outerEdgeBuffer = 3;
             
-            __instance.ld.bridgeTurnChance = Mathf.CeilToInt(currentFD.exitCount * 3f);
+            __instance.ld.bridgeTurnChance = Mathf.CeilToInt(Mathf.Clamp(currentFD.exitCount,1f,5f) * 3f); //lol
 
             __instance.ld.itemChance = (int)currentFD.itemChance;
 
@@ -773,10 +984,7 @@ namespace BaldiEndless
             __instance.ld.maxSpecialBuilders = Mathf.RoundToInt(currentFD.unclampedScaleVar / 11f);
             __instance.ld.minSpecialBuilders = Mathf.RoundToInt((currentFD.unclampedScaleVar / 11f) / 1.5f);
 
-            List<ObjectBuilder> extraObjs = new List<ObjectBuilder>
-            {
-                EndlessFloorsPlugin.objBuilders.Find(x => x.name == "PlantBuilder")
-            };
+            List<ObjectBuilder> extraObjs = new List<ObjectBuilder>();
 
             WeightedObjectBuilder[] possibleExtraBuilders = new WeightedObjectBuilder[]
             {
@@ -797,16 +1005,33 @@ namespace BaldiEndless
                 },
                 new WeightedObjectBuilder()
                 {
+                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Bell Builder")),
+                    weight = 50
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Vent Builder")),
+                    weight = 70
+                },
+                new WeightedObjectBuilder()
+                {
                     selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == Obstacle.Fountain),
                     weight = 80
                 },
             };
 
-            int extraBuilders = rng.Next(2, 2 + Mathf.FloorToInt(currentFD.FloorID / 5));
+            int extraBuilders = rng.Next(2, Mathf.Min(2 + Mathf.FloorToInt(currentFD.FloorID / 5),12));
 
             for (int i = 0; i < extraBuilders; i++)
             {
                 extraObjs.Add(WeightedObjectBuilder.ControlledRandomSelection(possibleExtraBuilders,rng));
+            }
+
+            //move this last so the other stuff has room to generate
+            extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.name == "PlantBuilder"));
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Trap Door Builder")));
             }
 
             __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
@@ -854,13 +1079,22 @@ namespace BaldiEndless
                 }
             };
 
-            __instance.ld.specialRooms = new WeightedSpecialRoomCreator[3]
+            /*if (EndlessFloorsPlugin.TimesInstalled)
             {
-                new WeightedSpecialRoomCreator()
+                __instance.ld.classBuilders = __instance.ld.classBuilders.AddToArray(new WeightedRoomBuilder()
+                {
+                    selection = Resources.FindObjectsOfTypeAll<ClassBuilder>().ToList().Find(x => x.name == "CustomRoomBuilder_Messy Class Builder"),
+                    weight = 90
+                });
+            }*/
+
+            __instance.ld.specialRooms = new WeightedSpecialRoomCreator[]
+            {
+                /*new WeightedSpecialRoomCreator()
                 {
                     weight = 90,
                     selection=EndlessFloorsPlugin.SpecialCreators.Find(x => x.obstacle == Obstacle.Cafe)
-                },
+                },*/
                 new WeightedSpecialRoomCreator()
                 {
                     weight = 90,
@@ -882,11 +1116,7 @@ namespace BaldiEndless
 
             __instance.ld.timeBonusVal = 1 * currentFD.FloorID;
 
-            // let times handle this one if its installed because well. i dont change this table, i have no reason to NOT let times take control over it
-            if (!EndlessFloorsPlugin.TimesInstalled)
-            {
-                __instance.ld.fieldTripItems = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2").levelObject.fieldTripItems; //TODO: DONT FUCKING DO THIS
-            }
+            __instance.ld.fieldTripItems = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2").levelObject.fieldTripItems; //TODO: DONT FUCKING DO THIS
 
             __instance.ld.fieldTrips = new WeightedFieldTrip[2]
             {
@@ -919,14 +1149,7 @@ namespace BaldiEndless
             __instance.ld.classFloorTexs = EndlessFloorsPlugin.profFloorTextures.ToArray();
 
             __instance.ld.finalLevel = false; // THERE IS NO END
-            
-            //tell the post generator to fuck itself
-            if (EndlessFloorsPlugin.TimesInstalled)
-            {
-                // cease this torment
-                //EndlessFloorsPlugin.SetContentManager("CafeteriaItems", EndlessFloorsPlugin.weightedItems, BindingFlags.NonPublic);
-                EndlessFloorsPlugin.SetContentManager("allItems", EndlessFloorsPlugin.weightedItems.ToList(), BindingFlags.NonPublic | BindingFlags.Instance);
-            }
+
         }
     }
 }

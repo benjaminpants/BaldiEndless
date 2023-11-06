@@ -16,6 +16,22 @@ namespace BaldiEndless
         static bool Prefix(ITM_GrapplingHook __instance, Collision collision)
         {
             if (!EndlessFloorsPlugin.currentSave.HasUpgrade(typeof(GrappleBreakWindows))) return true;
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                throw new NotImplementedException("NOT DONE!");
+                Door door = collision.transform.parent.gameObject.GetComponent<Door>();
+                if (door)
+                {
+                    if (door.GetType() == typeof(Window))
+                    {
+                        return true;
+                    }
+                    door.Unlock();
+                    door.Open(false,true);
+                    return false;
+                }
+                return true;
+            }
             if (collision.transform.parent.gameObject.CompareTag("Window"))
             {
                 collision.transform.parent.gameObject.GetComponent<Window>().Break(true);

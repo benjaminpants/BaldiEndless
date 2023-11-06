@@ -23,6 +23,29 @@ namespace BaldiEndless
 
     }
 
+    [HarmonyPatch(typeof(EnvironmentController))]
+    [HarmonyPatch("SpawnNPC")]
+    public class SpawnNPCPatch
+    {
+        public static void Postfix(EnvironmentController __instance, NPC npc)
+        {
+            float moveSpeed = 0f;
+            int unclampedCount = EndlessFloorsPlugin.currentFloorData.npcCountUnclamped;
+            int clampedCount = Mathf.Min(unclampedCount, EndlessFloorsPlugin.weightedNPCs.Count);
+            bool isBaldi = npc.Character == Character.Baldi;
+            if (Mathf.Abs(clampedCount - unclampedCount) >= 3)
+            {
+                moveSpeed = Mathf.Min(1f + (((Mathf.Abs(clampedCount - unclampedCount)) - 2f) * (isBaldi ? 0.010f : 0.020f)), isBaldi ? 1.4f : 1.6f);
+            }
+            if (moveSpeed != 0f)
+            {
+                Debug.Log(moveSpeed);
+                MovementModifier mm = new MovementModifier(Vector3.zero, moveSpeed);
+                __instance.Npcs.Last().GetComponent<ActivityModifier>().moveMods.Add(mm);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(BaseGameManager))]
     [HarmonyPatch("Initialize")]
     class QuitOnBeyondMap
@@ -104,7 +127,7 @@ namespace BaldiEndless
             if (__instance.NotebookTotal > standardCount)
             {
                 __instance.AngerBaldi(-(((float)count) * ___notebookAngerVal)); // undo the anger done by the game (makes the math easier)
-                float angerAdditive = Mathf.Min(Mathf.Floor(Mathf.Max(EndlessFloorsPlugin.currentSave.currentFloorData.FloorID - 30,0) / 10f) * 0.1f,1f);
+                float angerAdditive = 0f;
                 float stretchedTotal = ((float)standardCount + angerAdditive) / __instance.NotebookTotal;
                 __instance.AngerBaldi((((float)count) * ___notebookAngerVal) * stretchedTotal);
             }

@@ -62,6 +62,13 @@ namespace BaldiEndless
             }
         }
 
+        public int npcCountUnclamped
+        {
+            get
+            {
+                return Mathf.RoundToInt((FloorID / 1.3f) - 1);
+            }
+        }
         public int minPlots
         {
             get

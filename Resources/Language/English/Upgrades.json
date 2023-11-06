@@ -8,6 +8,7 @@
 {"key":"Upg_HungryBully","value":"Hungry Bully\nThis'll make Bully prefer to steal Zesty Bars from you!\nIf you have none, he'll take your BSODAs.\nIf you have none of those, he'll take your Apples!"},
 {"key":"Upg_PompIncrease","value":"Mrs. Pomp Timer Increase\nThis'll increase the time Mrs Pomp gives you to head to her class!"},
 {"key":"Upg_GrappleBreak","value":"Grapple Upgrade\nThis'll allow grappling hooks to break through windows!"},
+{"key":"Upg_GrappleBreakDoor","value":"Grapple Upgrade\nThis'll allow grappling hooks to break through any lock!"},
 {"key":"Upg_SpeedyWhistle","value":"Hyper Whistle\nThe whistle will make Principal even quicker for MORE instant justice!"},
 {"key":"Upg_Bank","value":"Lucky Quarter\nWhenever you use an item, there is a chance it'll be replaced with a quarter!\nThe likelyhood depends on how many of these you have!"},
 {"key":"Upg_Drink","value":"Drink Efficiency\nIncreases the stamina when you drink from a fountain by 10% for every one of these you have!"},
