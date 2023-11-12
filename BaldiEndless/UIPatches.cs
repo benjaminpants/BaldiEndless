@@ -75,7 +75,7 @@ namespace BaldiEndless
                 EndlessFloorsPlugin.Instance.selectedFloor = 99;
                 gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
                 evl.Initialize();
-                Singleton<CoreGameManager>.Instance.AddPoints(9999, 0, false);
+                Singleton<CoreGameManager>.Instance.AddPoints(1111 * EndlessFloorsPlugin.Instance.selectedFloor, 0, false);
                 evl.QueueShop();
                 gl.SetSave(false);
             });

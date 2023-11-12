@@ -463,7 +463,7 @@ namespace BaldiEndless
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
                     weight = 1,
-                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("SuperIntendent"))
+                    selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Super Intendent"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
