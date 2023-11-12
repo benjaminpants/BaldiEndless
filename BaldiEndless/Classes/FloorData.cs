@@ -66,7 +66,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.RoundToInt((FloorID / 1.3f) - 1);
+                return Mathf.RoundToInt((FloorID / 1.4f) - 1);
             }
         }
         public int minPlots

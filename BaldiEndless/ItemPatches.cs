@@ -18,7 +18,7 @@ namespace BaldiEndless
             if (!EndlessFloorsPlugin.currentSave.HasUpgrade(typeof(GrappleBreakWindows))) return true;
             if (EndlessFloorsPlugin.TimesInstalled)
             {
-                throw new NotImplementedException("NOT DONE!");
+                return true;
                 Door door = collision.transform.parent.gameObject.GetComponent<Door>();
                 if (door)
                 {
