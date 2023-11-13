@@ -16,6 +16,7 @@ namespace BaldiEndless
             for (int i = 0; i < floor; i++)
             {
                 YTPs += (Mathf.Min(tempD.classRoomCount,50) * 10);
+                YTPs += Mathf.FloorToInt(tempD.unclampedScaleVar * 2);
                 tempD.FloorID++;
             }
 
@@ -58,7 +59,7 @@ namespace BaldiEndless
         {
             get
             {
-                return classRoomCount;
+                return Math.Max(classRoomCount,4);
             }
         }
 
@@ -66,7 +67,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.RoundToInt((FloorID / 1.4f) - 1);
+                return Mathf.RoundToInt((FloorID / 1.5f) - 1);
             }
         }
         public int minPlots

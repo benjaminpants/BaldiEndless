@@ -307,9 +307,9 @@ namespace BaldiEndless
 
         public override int SellPrice => 75;
 
-        public override string Description => EndlessFloorsPlugin.TimesInstalled ? "Upg_GrappleBreakDoor" : "Upg_GrappleBreak";
+        public override string Description => "Upg_GrappleBreak";
 
-        public override string[] Icons => EndlessFloorsPlugin.TimesInstalled ? new string[] { "GrappleBreakDoor" } : new string[] { "GrappleBreak" };
+        public override string[] Icons => new string[] { "GrappleBreak" };
 
         public override int MaxStack => 1;
     }

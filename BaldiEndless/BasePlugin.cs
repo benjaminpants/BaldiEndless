@@ -449,7 +449,7 @@ namespace BaldiEndless
             {
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
-                    weight = 20,
+                    weight = 25,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Office Chair"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
@@ -467,12 +467,12 @@ namespace BaldiEndless
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
-                    weight = 45,
+                    weight = 30,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Crazy Clock"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
-                    weight = 30,
+                    weight = 34,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Forgotten"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
@@ -482,7 +482,7 @@ namespace BaldiEndless
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
-                    weight = 20,
+                    weight = 18,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Robocam"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
@@ -492,7 +492,7 @@ namespace BaldiEndless
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
-                    weight = 40,
+                    weight = 20,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Stunly"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
@@ -507,17 +507,17 @@ namespace BaldiEndless
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
-                    weight = 80,
+                    weight = 70,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Super Intendent Jr"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
                 {
-                    weight = 90,
+                    weight = 80,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Glue Boy"))
                 });
                 EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC() //principal replacement that barely acts like the principal
                 {
-                    weight = 30,
+                    weight = 20,
                     selection = npcs.Find(x => x.Character == EnumExtensions.GetFromExtendedName<Character>("Magical Student"))
                 });
                 //i was also tempted to include 0th prize but if i recall two gotta sweep's that collide with eachother can result in infinite velocity and. nuh uh not dealing with that
@@ -727,6 +727,17 @@ namespace BaldiEndless
         }
     }
 
+    [HarmonyPatch(typeof(MazeGenerator))]
+    [HarmonyPatch("StartGenerator")]
+    class MazeFix
+    {
+        static void Prefix(RoomController room, System.Random rng, ref int ___minPatchSize, ref int ___maxPatchSize)
+        {
+            ___maxPatchSize = Math.Min(___maxPatchSize, Math.Min(room.size.x - 3, room.size.z - 3));
+            ___minPatchSize = Math.Min(___maxPatchSize, ___minPatchSize);
+        }
+    }
+
     [HarmonyPatch(typeof(ElevatorScreen))]
     [HarmonyPatch("Initialize")]
     class GetFreeUpgrades
@@ -773,76 +784,6 @@ namespace BaldiEndless
                 EndlessFloorsPlugin.victoryScene.levelTitle = "LAP1";
                 sceneObject.nextLevel = EndlessFloorsPlugin.victoryScene;
             }*/
-        }
-    }
-
-
-    //tell times that we are always on floor 1
-    [ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
-    [HarmonyPatch("BB_MOD.GenericExtensions, Baldi's Basics Times", "ToFloorIdentifier")]
-    class TimesFloor3Patch
-    {
-        private static void Prefix(ref string name)
-        {
-            name = "F1";
-        }
-    }
-
-    //tell times that everything is available always
-    [ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
-    [HarmonyPatch("BB_MOD.Builders.TrapDoorBuilder, Baldi's Basics Times", "Build")]
-    class TimesTrapPatch
-    {
-        private static void Prefix(ObjectBuilder __instance, ref System.Random cRng)
-        {
-            Type trapDoorType = Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.Builders.TrapDoorBuilder");
-            int maxAllowed = Mathf.Max(Mathf.CeilToInt(EndlessFloorsPlugin.currentFloorData.scaleVar / 45f), 1);
-            int maxAllowedLinked = Mathf.Min(maxAllowed - cRng.Next(1, Mathf.Max(maxAllowed / 4, 2)), maxAllowed);
-            int maxAllowedRandom = Mathf.Max(maxAllowed - maxAllowedLinked, cRng.Next(1, Mathf.Max(maxAllowed / 6, 2)));
-
-            trapDoorType.GetField("minAmount", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(__instance,1);
-            trapDoorType.GetField("maxAmount", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(__instance, maxAllowed);
-            trapDoorType.GetField("amountOfLinkedTrapDoors", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(__instance, maxAllowedLinked);
-            trapDoorType.GetField("amountOfRngTrapDoors", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(__instance, maxAllowedRandom);
-
-            //MethodInfo configFunc = trapDoorType.GetMethod("SetMyConfigurations", BindingFlags.Public | BindingFlags.Instance);
-            //Debug.Log(configFunc);
-            //configFunc.Invoke(__instance, new object[] { 1, maxAllowed, maxAllowedRandom, maxAllowedLinked});
-        }
-
-        private static void Finalizer(Exception __exception)
-        {
-            Debug.Log(__exception);
-        }
-    }
-
-    [ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
-    [HarmonyPatch("BB_MOD.ContentManager, Baldi's Basics Times", "RoomCount")]
-    class TimesRoomCountPatch
-    {
-        private static void Prefix(object __instance, ref int __result, ref Dictionary<RoomCategory, int[]> ___basicRoomPairs)
-        {
-            ___basicRoomPairs.Clear();
-            ___basicRoomPairs.Add(EnumExtensions.GetFromExtendedName<RoomCategory>("bathroom"), 
-                new int[] { 
-                    Mathf.FloorToInt(EndlessFloorsPlugin.currentFloorData.classRoomCount / 30),
-                    Mathf.RoundToInt(EndlessFloorsPlugin.currentFloorData.classRoomCount / 10)
-                });
-            ___basicRoomPairs.Add(EnumExtensions.GetFromExtendedName<RoomCategory>("abandoned"),
-                new int[] {
-                    Math.Min(Mathf.FloorToInt(EndlessFloorsPlugin.currentFloorData.exitCount / 3),3),
-                    Math.Min(Mathf.FloorToInt(EndlessFloorsPlugin.currentFloorData.exitCount / 4),5)
-                });
-            ___basicRoomPairs.Add(EnumExtensions.GetFromExtendedName<RoomCategory>("computerRoom"),
-                new int[] {
-                    Math.Min(Mathf.FloorToInt(EndlessFloorsPlugin.currentFloorData.classRoomCount / 5),1),
-                    Math.Min(Mathf.FloorToInt(EndlessFloorsPlugin.currentFloorData.classRoomCount / 5),1),
-                });
-        }
-
-        private static void Finalizer(Exception __exception)
-        {
-            Debug.Log(__exception);
         }
     }
 
@@ -908,8 +849,6 @@ namespace BaldiEndless
 
             float coldLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + rng.Next(-50,50))),0f);
             float warmLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + rng.Next(-50, 50))), 0f);
-            Debug.Log(coldLight);
-            Debug.Log(warmLight);
 
             __instance.ld.standardLightColor = Color.Lerp(Color.Lerp(Color.white, coldColor, coldLight), warmColor, warmLight);
 
@@ -1085,7 +1024,11 @@ namespace BaldiEndless
             extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.name == "PlantBuilder"));
             if (EndlessFloorsPlugin.TimesInstalled)
             {
-                extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Trap Door Builder")));
+                // only so later on floors get vents
+                if (currentFD.scaleVar > 35f)
+                {
+                    extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Trap Door Builder")));
+                }
             }
 
             __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
@@ -1154,11 +1097,11 @@ namespace BaldiEndless
                     weight = 90,
                     selection=EndlessFloorsPlugin.SpecialCreators.Find(x => x.obstacle == Obstacle.Playground)
                 },
-                /*new WeightedSpecialRoomCreator()
+                new WeightedSpecialRoomCreator()
                 {
                     weight = 70,
                     selection=EndlessFloorsPlugin.SpecialCreators.Find(x => x.obstacle == Obstacle.Library)
-                },*/
+                },
 
             };
 

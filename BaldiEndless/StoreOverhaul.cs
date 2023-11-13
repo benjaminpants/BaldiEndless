@@ -60,11 +60,11 @@ namespace BaldiEndless
                 selection = new StaminaIncrease(),
                 weight = 90
             },
-            new WeightedSelection<GameUpgrade>()
+            /*new WeightedSelection<GameUpgrade>()
             {
                 selection = new FieldtripRedo(),
                 weight = 85
-            },
+            },*/
             new WeightedSelection<GameUpgrade>()
             {
                 selection = new DrinkEfficient(),

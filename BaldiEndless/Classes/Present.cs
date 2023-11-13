@@ -10,8 +10,9 @@ namespace BaldiEndless
     {
         public override bool Use(PlayerManager pm)
         {
-            Environment.Exit(0); //crash the game because fuck you
-            throw new NotImplementedException();
+            //Environment.Exit(0); //crash the game because fuck you
+            return false;
+            //throw new NotImplementedException();
         }
     }
 }
