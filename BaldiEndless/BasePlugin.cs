@@ -793,7 +793,6 @@ namespace BaldiEndless
     {
         static void Prefix(LevelGenerator __instance)
         {
-            Debug.Log("Endless Floors PATCH!");
             FloorData currentFD = EndlessFloorsPlugin.currentFloorData;
             __instance.seedOffset = currentFD.FloorID;
             __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.weightedNPCs.Count);
@@ -998,20 +997,24 @@ namespace BaldiEndless
                 },
                 new WeightedObjectBuilder()
                 {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Bell Builder")),
-                    weight = 50
-                },
-                new WeightedObjectBuilder()
-                {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Vent Builder")),
-                    weight = 70
-                },
-                new WeightedObjectBuilder()
-                {
                     selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == Obstacle.Fountain),
                     weight = 80
                 },
             };
+
+            if (EndlessFloorsPlugin.TimesInstalled)
+            {
+                possibleExtraBuilders = possibleExtraBuilders.AddItem(new WeightedObjectBuilder()
+                {
+                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Bell Builder")),
+                    weight = 50
+                }).ToArray();
+                possibleExtraBuilders = possibleExtraBuilders.AddItem(new WeightedObjectBuilder()
+                {
+                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Vent Builder")),
+                    weight = 70
+                }).ToArray();
+            }
 
             int extraBuilders = rng.Next(2, Mathf.Min(2 + Mathf.FloorToInt(currentFD.FloorID / 5),12));
 

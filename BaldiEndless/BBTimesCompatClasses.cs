@@ -16,6 +16,7 @@ using System.Xml.Linq;
 
 namespace BaldiEndless
 {
+    [ConditionalPatchMod(EndlessFloorsPlugin.BBTimesID)]
     [HarmonyPatch("BB_MOD.FeatureData, Baldi's Basics Times", "SetVariables")]
     class SetFeatureVariables
     {
