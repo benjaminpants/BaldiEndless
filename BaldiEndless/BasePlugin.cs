@@ -24,40 +24,28 @@ namespace BaldiEndless
 
         public const string BBTimesID = "pixelguy.pixelmodding.baldiplus.bbextracontent";
 
-        public SceneObject[] SceneObjects;
-
         public Dictionary<string, Sprite> UpgradeIcons = new Dictionary<string, Sprite>();
 
         public static ItemObject Nametag;
 
+        public SceneObject[] SceneObjects;
         public static List<ItemObject> ItemObjects;
-
         public static List<SpecialRoomCreator> SpecialCreators;
-
         public static List<FieldTripObject> tripObjects;
-
         public static List<ObjectBuilder> objBuilders;
-
         public static ClassBuilder classBuilder;
-
         public static MathMachineRoom mathMachineBuilder;
-
         public static List<NPC> NpcSpawns = new List<NPC>();
-
         public static List<Baldi> TheBladis = new List<Baldi>();
-
+        public static WeightedItemObject[] weightedItems;
         public static List<HappyBaldi> TheHappyBladis = new List<HappyBaldi>();
-
         public static List<RandomEvent> randomEvents = new List<RandomEvent>();
-
         public static List<WeightedNPC> weightedNPCs = new List<WeightedNPC>();
 
         public static SceneObject currentSceneObject;
-
         public static EndlessSave currentSave = new EndlessSave();
 
         public static Cubemap[] skyBoxes;
-
         public static SceneObject victoryScene;
 
         public static EndlessFloorsPlugin Instance { get; private set; }
@@ -65,34 +53,23 @@ namespace BaldiEndless
         public static Mode NNFloorMode = EnumExtensions.ExtendEnum<Mode>("Floor99");
 
         public static string F99MusicStart = "";
-
         public static string F99MusicLoop = "";
         public static FloorData currentFloorData => currentSave.currentFloorData;
 
         public bool hasSave = false; // UNUSED
-
         public int highestFloorCount = 1;
-
         public int selectedFloor = 1;
 
         public string lastAllocatedPath = "";
 
-        public static Texture2D upgradeTex5;
-
         public static Items presentEnum = EnumExtensions.ExtendEnum<Items>("Present");
-
         public static ItemObject presentObject;
 
-        public static WeightedItemObject[] weightedItems;
-
+        public static Texture2D upgradeTex5;
         public static List<WeightedTexture2D> wallTextures = new List<WeightedTexture2D>();
-
         public static List<WeightedTexture2D> facultyWallTextures = new List<WeightedTexture2D>();
-
         public static List<WeightedTexture2D> ceilTextures = new List<WeightedTexture2D>();
-
         public static List<WeightedTexture2D> floorTextures = new List<WeightedTexture2D>();
-
         public static List<WeightedTexture2D> profFloorTextures = new List<WeightedTexture2D>();
 
         public void SaveHighestFloor()
