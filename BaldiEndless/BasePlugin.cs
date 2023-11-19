@@ -96,17 +96,6 @@ namespace BaldiEndless
             File.WriteAllText(Path.Combine(lastAllocatedPath, "hasdata.txt"), val ? "y" : "n");
         }
 
-        //once again thank you chat gpt i HATE stupid stuff like this
-        public static void SetContentManager(string propertyName, object value, BindingFlags flags = BindingFlags.Public)
-        {
-            Type contentManagerType = Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.ContentManager");
-            object instance = contentManagerType.GetField("instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
-            Debug.Log(instance);
-            FieldInfo fo = contentManagerType.GetField(propertyName, flags);
-            Debug.Log(fo);
-            fo.SetValue(instance, value);
-        }
-
         /*void SaveLoad(bool isSave, string allocatedPath)
         {
             lastAllocatedPath = allocatedPath;
