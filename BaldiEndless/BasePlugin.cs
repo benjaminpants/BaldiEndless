@@ -235,14 +235,10 @@ namespace BaldiEndless
 
             if (EndlessFloorsPlugin.TimesInstalled)
             {
-                //harmony.Unpatch(typeof(LevelGenerator).GetMethod("StartGenerate"), HarmonyPatchType.Prefix, BBTimesID);
-                //harmony.Unpatch(typeof(LevelGenerator).GetMethod("Generate"), HarmonyPatchType.Transpiler, BBTimesID);
                 harmony.Unpatch(typeof(BaseGameManager).GetMethod("ElevatorClosed", BindingFlags.NonPublic | BindingFlags.Instance), HarmonyPatchType.Prefix, BBTimesID);
                 harmony.Unpatch(typeof(BaseGameManager).GetMethod("AllNotebooks", BindingFlags.NonPublic | BindingFlags.Instance), HarmonyPatchType.Prefix, BBTimesID);
-                //harmony.Unpatch(typeof(CafeteriaCreator).GetMethod("Initialize", BindingFlags.Public | BindingFlags.Instance), HarmonyPatchType.Prefix, BBTimesID);
             }
             harmony.PatchAllConditionals();
-            //Debug.Log(Chainloader.PluginInfos[EndlessFloorsPlugin.BBTimesID].Instance.GetType().Assembly.GetType("BB_MOD.ContentManager").Assembly.FullName);
         }
 
         public void UpdateData(ref SceneObject sceneObject)
