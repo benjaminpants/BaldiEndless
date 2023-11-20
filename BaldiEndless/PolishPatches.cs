@@ -13,7 +13,6 @@ using System.Reflection;
 using UnityEngine.Rendering;
 using System.Collections;
 using UnityEngine.Events;
-using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 
 namespace BaldiEndless
 {

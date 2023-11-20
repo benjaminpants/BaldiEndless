@@ -35,11 +35,10 @@ namespace BaldiEndless
             bool isBaldi = npc.Character == Character.Baldi;
             if (Mathf.Abs(clampedCount - unclampedCount) >= 3)
             {
-                moveSpeed = Mathf.Min(1f + (((Mathf.Abs(clampedCount - unclampedCount)) - 2f) * (isBaldi ? 0.010f : 0.020f)), isBaldi ? 1.4f : 1.6f);
+                moveSpeed = Mathf.Min(1f + (((Mathf.Abs(clampedCount - unclampedCount)) - 2f) * (isBaldi ? 0.010f : 0.020f)), isBaldi ? 1.3f : 1.6f);
             }
             if (moveSpeed != 0f)
             {
-                Debug.Log(moveSpeed);
                 MovementModifier mm = new MovementModifier(Vector3.zero, moveSpeed);
                 __instance.Npcs.Last().GetComponent<ActivityModifier>().moveMods.Add(mm);
             }

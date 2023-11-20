@@ -66,8 +66,8 @@ namespace BaldiEndless
             {
                 GameLoader gl = Resources.FindObjectsOfTypeAll<GameLoader>().First();
                 gl.gameObject.SetActive(true);
-                gl.Initialize(0);
                 gl.CheckSeed();
+                gl.Initialize(0);
                 gl.SetMode((int)EndlessFloorsPlugin.NNFloorMode);
                 ElevatorScreen evl = SceneManager.GetActiveScene().GetRootGameObjects().Where(x => x.name == "ElevatorScreen").First().GetComponent<ElevatorScreen>();
                 gl.AssignElevatorScreen(evl);
