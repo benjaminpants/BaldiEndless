@@ -130,7 +130,7 @@ namespace BaldiEndless
         {
             get
             {
-                return (FloorID % 99 == 0) ? 16 : Mathf.Clamp(Mathf.CeilToInt(FloorID / 6) + 1,1,8);
+                return (FloorID % 99 == 0) ? 16 : Mathf.Clamp(Mathf.CeilToInt(FloorID / 9) + 1,1,8);
             }
         }
 
