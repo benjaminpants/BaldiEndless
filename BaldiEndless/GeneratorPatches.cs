@@ -161,6 +161,11 @@ namespace BaldiEndless
                 {
                     weight = 90,
                     selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Flood)
+                },
+                new WeightedRandomEvent()
+                {
+                    weight = 60,
+                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Lockdown)
                 }
             };
 

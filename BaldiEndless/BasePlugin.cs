@@ -18,7 +18,7 @@ namespace BaldiEndless
 {
 
     //[BepInIncompatibility(BBTimesID)]
-    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "2.0.0.0")]
+    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "1.1.0.0")]
     public class EndlessFloorsPlugin : BaseUnityPlugin
     {
 

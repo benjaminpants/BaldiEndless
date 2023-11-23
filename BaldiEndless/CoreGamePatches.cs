@@ -35,7 +35,7 @@ namespace BaldiEndless
             bool isBaldi = npc.Character == Character.Baldi;
             if (Mathf.Abs(clampedCount - unclampedCount) >= 3)
             {
-                moveSpeed = Mathf.Min(1f + (((Mathf.Abs(clampedCount - unclampedCount)) - 2f) * (isBaldi ? 0.010f : 0.020f)), isBaldi ? 1.3f : 1.6f);
+                moveSpeed = Mathf.Min(1f + (((Mathf.Abs(clampedCount - unclampedCount)) - 2f) * (isBaldi ? 0.010f : 0.020f)), isBaldi ? 1.1f : 1.6f);
             }
             if (moveSpeed != 0f)
             {
@@ -127,7 +127,7 @@ namespace BaldiEndless
             {
                 __instance.AngerBaldi(-(((float)count) * ___notebookAngerVal)); // undo the anger done by the game (makes the math easier)
                 float angerAdditive = 0f;
-                float stretchedTotal = ((float)standardCount + angerAdditive) / __instance.NotebookTotal;
+                float stretchedTotal = ((float)standardCount + angerAdditive) / (float)__instance.NotebookTotal;
                 __instance.AngerBaldi((((float)count) * ___notebookAngerVal) * stretchedTotal);
             }
         }
