@@ -18,6 +18,7 @@ namespace BaldiEndless
 {
 
     //[BepInIncompatibility(BBTimesID)]
+    [BepInDependency("mtm101.rulerp.bbplus.baldidevapi")]
     [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "1.1.0.0")]
     public class EndlessFloorsPlugin : BaseUnityPlugin
     {
@@ -222,6 +223,11 @@ namespace BaldiEndless
             ModdedSaveSystem.AddSaveLoadAction(this, SaveLoadHighestFloor);
 
             StartCoroutine(WaitTilAllLoaded(harmony));
+
+            //string myPath = AssetManager.GetModPath(EndlessFloorsPlugin.Instance);
+            string midiPath = Path.Combine(myPath, "Midi");
+            EndlessFloorsPlugin.F99MusicStart = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
+            EndlessFloorsPlugin.F99MusicLoop = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
         }
 
         private IEnumerator WaitTilAllLoaded(Harmony harmony)
@@ -256,10 +262,6 @@ namespace BaldiEndless
     {
         static void Postfix(NameManager __instance)
         {
-            string myPath = AssetManager.GetModPath(EndlessFloorsPlugin.Instance);
-            string midiPath = Path.Combine(myPath, "Midi");
-            EndlessFloorsPlugin.F99MusicStart = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
-            EndlessFloorsPlugin.F99MusicLoop = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
 
 
             EndlessFloorsPlugin.Instance.SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
