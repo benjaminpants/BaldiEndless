@@ -3,7 +3,7 @@ using BepInEx;
 using HarmonyLib;
 using MTM101BaldAPI;
 using UnityEngine;
-using MTM101BaldAPI.AssetManager;
+using MTM101BaldAPI.AssetTools;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -143,12 +143,12 @@ namespace BaldiEndless
 
         void AddWeightedTextures(ref List<WeightedTexture2D> tex, string folder)
         {
-            string myPath = AssetManager.GetModPath(this);
+            string myPath = AssetLoader.GetModPath(this);
             string wallsPath = Path.Combine(myPath, "Textures", folder);
             foreach (string p in Directory.GetFiles(wallsPath))
             {
                 string standardName = Path.GetFileNameWithoutExtension(p);
-                Texture2D texx = AssetManager.TextureFromFile(p);
+                Texture2D texx = AssetLoader.TextureFromFile(p);
                 string[] splitee = standardName.Split('!');
                 tex.Add(new WeightedTexture2D()
                 {
@@ -163,12 +163,12 @@ namespace BaldiEndless
             Instance = this;
             Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.endlessfloors");
             MTM101BaldiDevAPI.SavesEnabled = false;
-            string myPath = AssetManager.GetModPath(this);
+            string myPath = AssetLoader.GetModPath(this);
             string iconPath = Path.Combine(myPath, "UpgradeIcons");
             foreach (string p in Directory.GetFiles(iconPath))
             {
-                Texture2D tex = AssetManager.TextureFromFile(p);
-                Sprite spr = AssetManager.SpriteFromTexture2D(tex, Vector2.one / 2f, 50f);
+                Texture2D tex = AssetLoader.TextureFromFile(p);
+                Sprite spr = AssetLoader.SpriteFromTexture2D(tex, Vector2.one / 2f, 50f);
                 UpgradeIcons.Add(Path.GetFileNameWithoutExtension(p), spr);
             }
 
@@ -177,7 +177,7 @@ namespace BaldiEndless
             {
                 string standardName = Path.GetFileNameWithoutExtension(p);
                 if (standardName.StartsWith("F_")) continue; // no.
-                Texture2D tex = AssetManager.TextureFromFile(p);
+                Texture2D tex = AssetLoader.TextureFromFile(p);
                 string[] splitee = standardName.Split('!');
                 wallTextures.Add(new WeightedTexture2D()
                 {
@@ -187,7 +187,7 @@ namespace BaldiEndless
                 string facultyEquiv = Path.Combine(wallsPath, "F_" + splitee[0] + ".png");
                 if (File.Exists(facultyEquiv))
                 {
-                    Texture2D texf = AssetManager.TextureFromFile(facultyEquiv);
+                    Texture2D texf = AssetLoader.TextureFromFile(facultyEquiv);
                     facultyWallTextures.Add(new WeightedTexture2D()
                     {
                         selection = texf,
@@ -210,13 +210,13 @@ namespace BaldiEndless
 
             AddWeightedTextures(ref profFloorTextures, "ProfFloors");
 
-            upgradeTex5 = AssetManager.TextureFromMod(this, "UpgradeSlot5.png");
+            upgradeTex5 = AssetLoader.TextureFromMod(this, "UpgradeSlot5.png");
 
-            Texture2D presentTex = AssetManager.TextureFromMod(this, "PresentIcon_Large.png");
+            Texture2D presentTex = AssetLoader.TextureFromMod(this, "PresentIcon_Large.png");
 
-            Sprite presentSprite = AssetManager.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
+            Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
 
-            presentObject = ObjectCreatorHandlers.CreateItemObject("Itm_Present", "Itm_Present", presentSprite, presentSprite, presentEnum, 9999, 26);
+            presentObject = ObjectCreators.CreateItemObject("Itm_Present", "Itm_Present", presentSprite, presentSprite, presentEnum, 9999, 26);
 
             DontDestroyOnLoad(presentObject.item = new GameObject().AddComponent<ITM_Present>()); // WHAT THE FUCK THIS IS ACTUALLY VALID SYNTAX I WAS FUCKING JOKING
 
@@ -224,10 +224,10 @@ namespace BaldiEndless
 
             StartCoroutine(WaitTilAllLoaded(harmony));
 
-            //string myPath = AssetManager.GetModPath(EndlessFloorsPlugin.Instance);
+            //string myPath = AssetLoader.GetModPath(EndlessFloorsPlugin.Instance);
             string midiPath = Path.Combine(myPath, "Midi");
-            EndlessFloorsPlugin.F99MusicStart = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
-            EndlessFloorsPlugin.F99MusicLoop = AssetManager.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
+            EndlessFloorsPlugin.F99MusicStart = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
+            EndlessFloorsPlugin.F99MusicLoop = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
         }
 
         private IEnumerator WaitTilAllLoaded(Harmony harmony)
