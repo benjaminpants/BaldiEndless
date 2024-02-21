@@ -39,17 +39,6 @@ namespace BaldiEndless
         }
     }
 
-    [HarmonyPatch(typeof(MazeGenerator))]
-    [HarmonyPatch("StartGenerator")]
-    class MazeFix
-    {
-        static void Prefix(RoomController room, System.Random rng, ref int ___minPatchSize, ref int ___maxPatchSize)
-        {
-            ___maxPatchSize = Math.Min(___maxPatchSize, Math.Min(room.size.x - 3, room.size.z - 3));
-            ___minPatchSize = Math.Min(___maxPatchSize, ___minPatchSize);
-        }
-    }
-
     [HarmonyPatch(typeof(GameLoader))]
     [HarmonyPatch("LoadLevel")]
     class EternallyStuck
@@ -169,35 +158,6 @@ namespace BaldiEndless
                 }
             };
 
-            if (EndlessFloorsPlugin.TimesInstalled)
-            {
-                __instance.ld.randomEvents.Add(new WeightedRandomEvent()
-                {
-                    weight = 20,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => (x.gameObject.name == "CustomEv_PrincipalOut"))
-                });
-                __instance.ld.randomEvents.Add(new WeightedRandomEvent()
-                {
-                    weight = 50,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => (x.gameObject.name == "CustomEv_BlackOut"))
-                });
-                __instance.ld.randomEvents.Add(new WeightedRandomEvent()
-                {
-                    weight = 70,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => (x.gameObject.name == "CustomEv_CurtainsClosed"))
-                });
-                __instance.ld.randomEvents.Add(new WeightedRandomEvent()
-                {
-                    weight = 65,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => (x.gameObject.name == "CustomEv_WindySchool"))
-                });
-                /*Debug.Log("Select");
-                foreach (WeightedRandomEvent wre in __instance.ld.randomEvents)
-                {
-                    Debug.Log(wre.selection);
-                }*/
-            }
-
             if (currentFD.classRoomCount >= 6)
             {
                 __instance.ld.randomEvents.Add(new WeightedRandomEvent()
@@ -291,20 +251,6 @@ namespace BaldiEndless
                 },
             };
 
-            if (EndlessFloorsPlugin.TimesInstalled)
-            {
-                possibleExtraBuilders = possibleExtraBuilders.AddItem(new WeightedObjectBuilder()
-                {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Bell Builder")),
-                    weight = 50
-                }).ToArray();
-                possibleExtraBuilders = possibleExtraBuilders.AddItem(new WeightedObjectBuilder()
-                {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Vent Builder")),
-                    weight = 70
-                }).ToArray();
-            }
-
             int extraBuilders = rng.Next(2, Mathf.Min(2 + Mathf.FloorToInt(currentFD.FloorID / 5), 12));
 
             for (int i = 0; i < extraBuilders; i++)
@@ -314,14 +260,6 @@ namespace BaldiEndless
 
             //move this last so the other stuff has room to generate
             extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.name == "PlantBuilder"));
-            if (EndlessFloorsPlugin.TimesInstalled)
-            {
-                // only so later on floors get vents
-                if (currentFD.scaleVar > 35f)
-                {
-                    extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("Trap Door Builder")));
-                }
-            }
 
             __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
 
@@ -353,6 +291,8 @@ namespace BaldiEndless
                     weight = 90
                 }
             };
+
+            // select class builders
 
             __instance.ld.classBuilders = new WeightedRoomBuilder[2]
             {
@@ -396,20 +336,6 @@ namespace BaldiEndless
                 },
 
             };
-
-            if (EndlessFloorsPlugin.TimesInstalled)
-            {
-                __instance.ld.specialRooms = __instance.ld.specialRooms.AddItem(new WeightedSpecialRoomCreator()
-                {
-                    weight = 80,
-                    selection = EndlessFloorsPlugin.SpecialCreators.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("BasketBallArea"))
-                }).ToArray();
-                __instance.ld.specialRooms = __instance.ld.specialRooms.AddItem(new WeightedSpecialRoomCreator()
-                {
-                    weight = 75,
-                    selection = EndlessFloorsPlugin.SpecialCreators.Find(x => x.obstacle == EnumExtensions.GetFromExtendedName<Obstacle>("ForestArea"))
-                }).ToArray();
-            }
 
             __instance.ld.totalShopItems = 2;
 
