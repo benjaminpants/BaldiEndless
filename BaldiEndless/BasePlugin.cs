@@ -25,22 +25,9 @@ namespace BaldiEndless
 
         public Dictionary<string, Sprite> UpgradeIcons = new Dictionary<string, Sprite>();
 
-        public static ItemObject Nametag;
-
         public SceneObject[] SceneObjects;
-        public static List<WeightedRoomAsset> WeightedClassRooms = new List<WeightedRoomAsset>();
-        public static List<ItemObject> ItemObjects;
-        public static List<FieldTripObject> tripObjects;
-        public static List<ObjectBuilder> objBuilders;
-        public static List<NPC> NpcSpawns = new List<NPC>();
-        public static List<Baldi> TheBladis = new List<Baldi>();
-        public static WeightedItemObject[] weightedItems;
-        public static List<HappyBaldi> TheHappyBladis = new List<HappyBaldi>();
-        public static List<RandomEvent> randomEvents = new List<RandomEvent>();
-        public static List<WeightedNPC> weightedNPCs = new List<WeightedNPC>();
 
         public static SceneObject currentSceneObject;
-        public static EndlessSave currentSave = new EndlessSave();
 
         public static Cubemap[] skyBoxes;
         public static SceneObject victoryScene;
@@ -51,9 +38,7 @@ namespace BaldiEndless
 
         public static string F99MusicStart = "";
         public static string F99MusicLoop = "";
-        public static FloorData currentFloorData => currentSave.currentFloorData;
 
-        public bool hasSave = false; // UNUSED
         public int highestFloorCount = 1;
         public int selectedFloor = 1;
 
@@ -239,198 +224,11 @@ namespace BaldiEndless
         public void UpdateData(ref SceneObject sceneObject)
         {
             sceneObject = currentSceneObject;
-            sceneObject.levelNo = currentSave.currentFloorData.FloorID;
+            //sceneObject.levelNo = currentSave.currentFloorData.FloorID;
             sceneObject.nextLevel = sceneObject;
-            sceneObject.levelTitle = "F" + currentSave.currentFloorData.FloorID;
+            //sceneObject.levelTitle = "F" + currentSave.currentFloorData.FloorID;
         }
     }
 
-    [HarmonyPatch(typeof(NameManager))]
-    [HarmonyPatch("Awake")]
-    class GetAllAssets
-    {
-        static void Postfix(NameManager __instance)
-        {
-            EndlessFloorsPlugin.Instance.SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
-            EndlessFloorsPlugin.tripObjects = Resources.FindObjectsOfTypeAll<FieldTripObject>().Where(x => x.tripPre != null).ToList();
-            EndlessFloorsPlugin.TheBladis = Resources.FindObjectsOfTypeAll<Baldi>().ToList();
-            EndlessFloorsPlugin.NpcSpawns = MTM101BaldiDevAPI.npcMetadata.All().ToValues().ToList(); //the metadatas should be organized proeprly/with proper defaults
-            EndlessFloorsPlugin.TheHappyBladis = Resources.FindObjectsOfTypeAll<HappyBaldi>().ToList();
-            EndlessFloorsPlugin.objBuilders = MTM101BaldiDevAPI.objBuilderMeta.All().ToValues().ToList();
-            EndlessFloorsPlugin.randomEvents = MTM101BaldiDevAPI.rngEvStorage.All().ToValues().ToList();
-            EndlessFloorsPlugin.ItemObjects = MTM101BaldiDevAPI.itemMetadata.All().ToValues().ToList();
-            EndlessFloorsPlugin.skyBoxes = Resources.FindObjectsOfTypeAll<Cubemap>().Where(x => x.name.Contains("Cubemap_")).ToArray();
-            EndlessFloorsPlugin.Nametag = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Nametag);
-            var npcs = EndlessFloorsPlugin.NpcSpawns;
-            EndlessFloorsPlugin.currentSceneObject = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F3");
-            EndlessFloorsPlugin.wallTextures.AddRange(EndlessFloorsPlugin.currentSceneObject.levelObject.hallWallTexs);
-            EndlessFloorsPlugin.ceilTextures.AddRange(EndlessFloorsPlugin.currentSceneObject.levelObject.hallCeilingTexs);
-            EndlessFloorsPlugin.floorTextures.AddRange(EndlessFloorsPlugin.currentSceneObject.levelObject.hallFloorTexs);
-            EndlessFloorsPlugin.facultyWallTextures.AddRange(EndlessFloorsPlugin.currentSceneObject.levelObject.facultyWallTexs);
-            EndlessFloorsPlugin.profFloorTextures.AddRange(EndlessFloorsPlugin.currentSceneObject.levelObject.facultyFloorTexs);
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 100,
-                selection = npcs.Find(x => x.Character == Character.Playtime)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 100,
-                selection = npcs.Find(x => x.Character == Character.Sweep)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 110,
-                selection = npcs.Find(x => x.Character == Character.Beans)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 100,
-                selection = npcs.Find(x => x.Character == Character.Bully)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 80,
-                selection = npcs.Find(x => x.Character == Character.Crafters)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 125,
-                selection = npcs.Find(x => x.Character == Character.Chalkles)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 10,
-                selection = npcs.Find(x => x.Character == Character.LookAt)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 90,
-                selection = npcs.Find(x => x.Character == Character.Pomp)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 95,
-                selection = npcs.Find(x => x.Character == Character.Cumulo)
-            });
-            EndlessFloorsPlugin.weightedNPCs.Add(new WeightedNPC()
-            {
-                weight = 70,
-                selection = npcs.Find(x => x.Character == Character.Prize)
-            });
-
-            EndlessFloorsPlugin.weightedItems = new WeightedItemObject[]
-            {
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Quarter),
-                    weight = 60
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.AlarmClock),
-                    weight = 55
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Apple),
-                    weight = 1
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Boots),
-                    weight = 55
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Bsoda),
-                    weight = 75
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.ChalkEraser),
-                    weight = 80
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.DetentionKey),
-                    weight = 40
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.GrapplingHook),
-                    weight = 25
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Nametag),
-                    weight = 45
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Wd40),
-                    weight = 60
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.PortalPoster),
-                    weight = 20
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.PrincipalWhistle),
-                    weight = 50
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Scissors),
-                    weight = 80
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.DoorLock),
-                    weight = 42
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Tape),
-                    weight = 40
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.Teleporter),
-                    weight = 25
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.ZestyBar),
-                    weight = 70
-                },
-                new WeightedItemObject()
-                {
-                    selection = EndlessFloorsPlugin.presentObject,
-                    weight = 74
-                }
-            };
-        }
-    }
-
-    [HarmonyPatch(typeof(ElevatorScreen))]
-    [HarmonyPatch("Initialize")]
-    class GetFreeUpgrades
-    {
-        static void Postfix(ElevatorScreen __instance)
-        {
-            if (Singleton<CoreGameManager>.Instance.currentMode != Mode.Main) return;
-            if (EndlessFloorsPlugin.currentFloorData.FloorID == 1) return;
-            if (EndlessFloorsPlugin.currentFloorData.FloorID == EndlessFloorsPlugin.Instance.selectedFloor)
-            {
-                if (EndlessFloorsPlugin.currentSave.hasClaimedFreeYTP) return;
-                EndlessFloorsPlugin.currentSave.hasClaimedFreeYTP = true;
-                Singleton<CoreGameManager>.Instance.AddPoints(FloorData.GetYTPsAtFloor(EndlessFloorsPlugin.Instance.selectedFloor - 1), 0, false);
-                __instance.QueueShop();
-            }
-        }
-    }
 
 }

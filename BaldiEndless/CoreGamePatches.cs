@@ -29,7 +29,7 @@ namespace BaldiEndless
     {
         public static void Postfix(EnvironmentController __instance, NPC npc)
         {
-            float moveSpeed = 0f;
+            /*float moveSpeed = 0f;
             int unclampedCount = EndlessFloorsPlugin.currentFloorData.npcCountUnclamped;
             int clampedCount = Mathf.Min(unclampedCount, EndlessFloorsPlugin.weightedNPCs.Count);
             bool isBaldi = npc.Character == Character.Baldi;
@@ -41,7 +41,7 @@ namespace BaldiEndless
             {
                 MovementModifier mm = new MovementModifier(Vector3.zero, moveSpeed);
                 __instance.Npcs.Last().GetComponent<ActivityModifier>().moveMods.Add(mm);
-            }
+            }*/
         }
     }
 
@@ -57,64 +57,15 @@ namespace BaldiEndless
             //__instance.Ec.Players[0].itm.AddItem(EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.GrapplingHook));
             if ((Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode) || (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free))
             {
-                if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
+                /*if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
                 {
                     UnityEngine.Object.Destroy(Singleton<ElevatorScreen>.Instance.gameObject);
                     Singleton<CoreGameManager>.Instance.Quit();
-                }
+                }*/
             }
         }
     }
 
-    [HarmonyPatch(typeof(BaseGameManager))]
-    [HarmonyPatch("BeginPlay")]
-    class ResetTrip
-    {
-        static FieldInfo theFo = AccessTools.Field(typeof(TripEntrance), "entered");
-        static void Postfix(BaseGameManager __instance, ref TripEntrance ___currentTripEntrance)
-        {
-            if (___currentTripEntrance == null) return;
-            if (!Singleton<CoreGameManager>.Instance.tripPlayed)
-            {
-                ___currentTripEntrance.BaldiSprite.enabled = true;
-                theFo.SetValue(___currentTripEntrance, false);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(BaseGameManager))]
-    [HarmonyPatch("BeginSpoopMode")]
-    class OnSpoopMode
-    {
-        static void Postfix(BaseGameManager __instance)
-        {
-            if (EndlessFloorsPlugin.currentSave.HasUpgrade(typeof(AutoTag)))
-            {
-                Item theTag = GameObject.Instantiate(EndlessFloorsPlugin.Nametag.item);
-                theTag.gameObject.SetActive(true);
-                theTag.Use(__instance.Ec.Players[0]);
-            }
-            __instance.Ec.Players[0].plm.staminaMax += EndlessFloorsPlugin.currentSave.staminasBought * 25;
-            // Singleton<CoreGameManager>.Instance.AddPoints(10000,0,true);
-            //__instance.Ec.Players[0].plm.stamina = __instance.Ec.Players[0].plm.staminaMax;
-        }
-    }
-
-    [HarmonyPatch(typeof(EnvironmentController))]
-    [HarmonyPatch("SetElevators")]
-    class OnElevator
-    {
-        static FieldInfo hasPlayer = AccessTools.Field(typeof(ColliderGroup), "hasPlayer");
-        static void Postfix(EnvironmentController __instance, bool enable)
-        {
-            if (!enable) return;
-            if (EndlessFloorsPlugin.currentSave.HasUpgrade(typeof(SkipExit)))
-            {
-                Elevator toClose = __instance.elevators[UnityEngine.Random.Range(0, __instance.elevators.Count)];
-                hasPlayer.SetValue(toClose.ColliderGroup, true); //there is totally a player here yes absolutely DO NOT QUESTION ANYTHING THERE IS A PLAYER HERE
-            }
-        }
-    }
 
     [HarmonyPatch(typeof(BaseGameManager))]
     [HarmonyPatch("CollectNotebooks")]
@@ -133,37 +84,4 @@ namespace BaldiEndless
         }
     }
 
-    public class AutoEndLevel : MonoBehaviour
-    {
-        public IEnumerator Wait()
-        {
-            yield return new WaitForSeconds(25f);
-            Singleton<BaseGameManager>.Instance.LoadNextLevel();
-            yield break;
-        }
-    }
-
-    [HarmonyPatch(typeof(PlaceholderWinManager))]
-    [HarmonyPatch("BeginPlay")]
-    class MakeNormal
-    {
-        static bool Prefix(PlaceholderWinManager __instance, ref MovementModifier ___moveMod, ref BaldiDance ___dancingBaldi, ref Balloon[] ___balloonPre)
-        {
-            //___moveMod.movementMultiplier = 0.5f;
-            AutoEndLevel ael = __instance.gameObject.AddComponent<AutoEndLevel>();
-            ael.StartCoroutine("Wait");
-            Time.timeScale = 1f;
-            AudioListener.pause = false;
-            Singleton<MusicManager>.Instance.PlayMidi("DanceV0_5", false);
-            ___dancingBaldi.gameObject.SetActive(true);
-            Singleton<CoreGameManager>.Instance.GetPlayer(0).Am.moveMods.Add(___moveMod);
-            Singleton<CoreGameManager>.Instance.GetPlayer(0).itm.enabled = false;
-            //base.StartCoroutine(this.FreakOut());
-            for (int i = 0; i < __instance.balloonCount; i++)
-            {
-                UnityEngine.Object.Instantiate<Balloon>(___balloonPre[UnityEngine.Random.Range(0, ___balloonPre.Length)], __instance.Ec.transform).Initialize(__instance.Ec.rooms[0]);
-            }
-            return false;
-        }
-    }
 }

@@ -60,7 +60,7 @@ namespace BaldiEndless
     {
         static void Prefix(BaseGameManager __instance, int ___elevatorsToClose)
         {
-            if (((EndlessFloorsPlugin.currentFloorData.FloorID % 99) == 0) && (___elevatorsToClose > 0))
+            if (((0/*EndlessFloorsPlugin.currentFloorData.FloorID % 99*/) == 0) && (___elevatorsToClose > 0))
             {
                 Singleton<MusicManager>.Instance.SetSpeed(Singleton<MusicManager>.Instance.MidiPlayer.MPTK_Speed + 0.035f);
             }
