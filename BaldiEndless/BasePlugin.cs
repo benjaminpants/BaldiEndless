@@ -22,15 +22,12 @@ namespace BaldiEndless
     [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "2.0.0.0")]
     public class EndlessFloorsPlugin : BaseUnityPlugin
     {
-
+        public AssetManager assetManager = new AssetManager();
         public Dictionary<string, Sprite> UpgradeIcons = new Dictionary<string, Sprite>();
-
         public SceneObject[] SceneObjects;
-
         public static SceneObject currentSceneObject;
 
-        public static Cubemap[] skyBoxes;
-        public static SceneObject victoryScene;
+        public static GeneratorData genData = new GeneratorData();
 
         public static EndlessFloorsPlugin Instance { get; private set; }
 
@@ -46,6 +43,10 @@ namespace BaldiEndless
 
         public static Items presentEnum = EnumExtensions.ExtendEnum<Items>("Present");
         public static ItemObject presentObject;
+
+        public static EndlessSaveData currentSave = new EndlessSaveData();
+
+        public static FloorData currentFloorData => currentSave.myFloorData;
 
         public static Texture2D upgradeTex5;
         public static List<WeightedTexture2D> wallTextures = new List<WeightedTexture2D>();
@@ -71,42 +72,6 @@ namespace BaldiEndless
             }
             highestFloorCount = int.Parse(File.ReadAllText(highestFloorCountFile));
         }
-
-        public void WriteHasDataAck(bool val)
-        {
-            if (lastAllocatedPath == "") throw new InvalidOperationException();
-            File.WriteAllText(Path.Combine(lastAllocatedPath, "hasdata.txt"), val ? "y" : "n");
-        }
-
-        /*void SaveLoad(bool isSave, string allocatedPath)
-        {
-            lastAllocatedPath = allocatedPath;
-            string playerDataPath = Path.Combine(allocatedPath,"EndlessSave.json");
-            string hasDataPath = Path.Combine(allocatedPath, "hasdata.txt");
-            if (!File.Exists(playerDataPath))
-            {
-                File.WriteAllText(playerDataPath, JsonUtility.ToJson(new EndlessSaveSerializable(currentSave), true));
-                WriteHasDataAck(false);
-                hasSave = false;
-            }
-            else
-            {
-                if (File.Exists(hasDataPath))
-                {
-                    hasSave = File.ReadAllText(hasDataPath) == "y" ? true : false;
-                }
-                else
-                {
-                    WriteHasDataAck(false);
-                    return;
-                }
-                if (hasSave)
-                {
-                    //load the save, only do this if they have a save to be loaded
-                    EndlessSaveSerializable serial = JsonUtility.FromJson<EndlessSaveSerializable>(File.ReadAllText(playerDataPath));
-                }
-            }
-        }*/
 
         void SaveLoadHighestFloor(bool isSave, string allocatedPath)
         {
@@ -135,6 +100,16 @@ namespace BaldiEndless
                     weight = int.Parse(splitee[1])
                 });
             }
+        }
+
+        // once all resources have been loaded
+        void OnResourcesLoaded()
+        {
+            assetManager.AddRange<HappyBaldi>(Resources.FindObjectsOfTypeAll<HappyBaldi>(), (bald) =>
+            {
+                if (bald.name == "HappyBaldi") return "HappyBaldi1";
+                return bald.name;
+            }); //we need the happy baldis
         }
 
         void Awake()
@@ -182,31 +157,25 @@ namespace BaldiEndless
                     });
                 }
             }
-
             AddWeightedTextures(ref ceilTextures, "Ceilings");
-
             AddWeightedTextures(ref floorTextures, "Floors");
-
             AddWeightedTextures(ref profFloorTextures, "ProfFloors");
 
             upgradeTex5 = AssetLoader.TextureFromMod(this, "UpgradeSlot5.png");
 
             Texture2D presentTex = AssetLoader.TextureFromMod(this, "PresentIcon_Large.png");
-
             Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
-
             presentObject = ObjectCreators.CreateItemObject("Itm_Present", "Itm_Present", presentSprite, presentSprite, presentEnum, 9999, 26);
-
             DontDestroyOnLoad(presentObject.item = new GameObject().AddComponent<ITM_Present>()); // WHAT THE FUCK THIS IS ACTUALLY VALID SYNTAX I WAS FUCKING JOKING
-
             ModdedSaveSystem.AddSaveLoadAction(this, SaveLoadHighestFloor);
-
             StartCoroutine(WaitTilAllLoaded(harmony));
 
             //string myPath = AssetLoader.GetModPath(EndlessFloorsPlugin.Instance);
             string midiPath = Path.Combine(myPath, "Midi");
             EndlessFloorsPlugin.F99MusicStart = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
             EndlessFloorsPlugin.F99MusicLoop = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
+
+            MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(OnResourcesLoaded, true);
 
         }
 

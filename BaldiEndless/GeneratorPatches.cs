@@ -15,7 +15,7 @@ namespace BaldiEndless
         static void Prefix()
         {
             SceneObject sceneObject = EndlessFloorsPlugin.currentSceneObject;
-            EndlessFloorsPlugin.currentSave.currentFloorData.FloorID += 1;
+            EndlessFloorsPlugin.currentSave.currentFloor += 1;
             if (!((Singleton<CoreGameManager>.Instance.currentMode == Mode.Free) || (Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode)))
             {
                 if (EndlessFloorsPlugin.currentFloorData.FloorID > EndlessFloorsPlugin.Instance.highestFloorCount)
@@ -45,12 +45,8 @@ namespace BaldiEndless
     {
         static void Prefix(ref SceneObject sceneObject)
         {
-            EndlessFloorsPlugin.currentSave = new EndlessSave();
+            EndlessFloorsPlugin.currentSave = new EndlessSaveData();
             EndlessFloorsPlugin.currentFloorData.FloorID = EndlessFloorsPlugin.Instance.selectedFloor;
-            if (EndlessFloorsPlugin.victoryScene == null)
-            {
-                EndlessFloorsPlugin.victoryScene = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "YAY");
-            }
             EndlessFloorsPlugin.Instance.UpdateData(ref sceneObject);
         }
     }
@@ -60,12 +56,161 @@ namespace BaldiEndless
     [HarmonyPatch("StartGenerate")]
     class GenerateBegin
     {
+
+        static List<T2> CreateWeightedShuffledListWithCount<T, T2>(List<T> list, int count, System.Random rng) where T : WeightedSelection<T2>
+        {
+            List<T> newL = new List<T>();
+            List<T> selections = list.ToList();
+            for (int i = 0; i < count; i++)
+            {
+                T selectedValue = WeightedSelection<T2>.ControlledRandomSelectionList(selections, rng);
+                selections.RemoveAll(x => EqualityComparer<T2>.Default.Equals(x.selection, selectedValue)); //thank you stack overflow for saving my ass
+                newL.Add(selectedValue);
+            }
+            return newL;
+        }
+
+        static List<T> CreateShuffledListWithCount<T>(List<T> list, int startingCount, int addCount, System.Random rng)
+        {
+            List<T> newList = new List<T>();
+            List<T> copiedList = list.ToList(); // create a duplicate list
+            for (int i = 0; i < startingCount + addCount; i++)
+            {
+                int selectedIndex = rng.Next(0, copiedList.Count);
+                copiedList.RemoveAt(selectedIndex);
+            }
+            return newList;
+        }
+
         static void Prefix(LevelGenerator __instance)
         {
             FloorData currentFD = EndlessFloorsPlugin.currentFloorData;
             __instance.seedOffset = currentFD.FloorID;
-            __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.weightedNPCs.Count);
+            __instance.ld.minSize = new IntVector2(currentFD.minSize, currentFD.minSize);
+            __instance.ld.maxSize = new IntVector2(currentFD.maxSize, currentFD.maxSize);
+            __instance.ld.previousLevels = new LevelObject[0];
 
+            __instance.ld.timeBonusVal = 1 * currentFD.FloorID;
+            __instance.ld.fieldTrip = false;//((currentFD.FloorID % 4 == 0) && currentFD.FloorID != 4) || currentFD.FloorID % 99 == 0;
+
+            __instance.ld.hallWallTexs = EndlessFloorsPlugin.wallTextures.ToArray();
+            __instance.ld.classWallTexs = EndlessFloorsPlugin.wallTextures.ToArray();
+            __instance.ld.facultyWallTexs = EndlessFloorsPlugin.facultyWallTextures.ToArray();
+
+            __instance.ld.classCeilingTexs = EndlessFloorsPlugin.ceilTextures.ToArray();
+            __instance.ld.hallCeilingTexs = EndlessFloorsPlugin.ceilTextures.ToArray();
+            __instance.ld.facultyCeilingTexs = EndlessFloorsPlugin.ceilTextures.ToArray();
+
+            __instance.ld.hallFloorTexs = EndlessFloorsPlugin.floorTextures.ToArray();
+            __instance.ld.facultyFloorTexs = EndlessFloorsPlugin.profFloorTextures.ToArray();
+            __instance.ld.classFloorTexs = EndlessFloorsPlugin.profFloorTextures.ToArray();
+
+            __instance.ld.finalLevel = false; // THERE IS NO END
+
+            System.Random stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
+
+            stableRng.Next();
+            stableRng.Next();
+
+            System.Random rng = new System.Random(Singleton<CoreGameManager>.Instance.Seed() + __instance.seedOffset);
+
+            Color warmColor = new Color(255f / 255f, 202 / 255f, 133 / 255f);
+            Color coldColor = new Color(133f / 255f, 161f / 255f, 255f / 255f);
+
+            float coldLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + stableRng.Next(-50, 50))), 0f);
+            float warmLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + stableRng.Next(-50, 50))), 0f);
+
+            __instance.ld.standardLightColor = Color.Lerp(Color.Lerp(Color.white, coldColor, coldLight), warmColor, warmLight);
+
+            if (currentFD.FloorID % 99 == 0)
+            {
+                __instance.ld.standardLightColor = Color.Lerp(__instance.ld.standardLightColor, Color.red, 0.3f);
+            }
+
+            // npc logic
+            __instance.ld.potentialNPCs = new List<WeightedNPC>();
+            __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.genData.npcs.Count);
+            stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
+            stableRng.Next();
+            __instance.ld.forcedNpcs = CreateWeightedShuffledListWithCount<NPC>(EndlessFloorsPlugin.genData.npcs, __instance.ld.additionalNPCs, stableRng).ToArray();
+
+            __instance.ld.exitCount = currentFD.exitCount;
+            __instance.ld.additionTurnChance = (int)(currentFD.unclampedScaleVar / 2);
+            __instance.ld.minClassRooms = currentFD.classRoomCount;
+            __instance.ld.maxClassRooms = currentFD.classRoomCount;
+            __instance.ld.windowChance = Mathf.Max((currentFD.FloorID * -1.2f) + 14, 2);
+            __instance.ld.mapPrice = currentFD.FloorID * 25;
+            __instance.ld.maxPlots = currentFD.maxPlots;
+            __instance.ld.minPlots = currentFD.minPlots;
+            __instance.ld.outerEdgeBuffer = 3;
+            __instance.ld.bridgeTurnChance = Mathf.CeilToInt(Mathf.Clamp(currentFD.exitCount, 1f, 5f) * 3f); //lol
+            //this changed... interesting...
+            //__instance.ld.itemChance = (int)currentFD.itemChance;
+
+            __instance.ld.maxSideHallsToRemove = Mathf.FloorToInt(currentFD.classRoomCount / 5);
+            __instance.ld.minSideHallsToRemove = Mathf.CeilToInt(currentFD.classRoomCount / 7);
+
+            __instance.ld.maxLightDistance = Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID / 3), 1, 9);
+
+            float rgb = Mathf.Max(16f, 255f - (currentFD.FloorID * 5));
+
+            __instance.ld.standardDarkLevel = new Color(rgb / 255, rgb / 255, rgb / 255);
+
+            __instance.ld.standardLightStrength = Mathf.Max(Mathf.RoundToInt(4f / (currentFD.FloorID / 24f)), 3);
+
+            __instance.ld.maxFacultyRooms = currentFD.maxFacultyRoomCount;
+            __instance.ld.minFacultyRooms = currentFD.minFacultyRoomCount;
+
+            __instance.ld.maxSpecialBuilders = Mathf.RoundToInt(currentFD.unclampedScaleVar / 11f);
+            __instance.ld.minSpecialBuilders = Mathf.RoundToInt((currentFD.unclampedScaleVar / 11f) / 1.5f);
+
+            __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
+            __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);
+
+            __instance.ld.potentialClassRooms = EndlessFloorsPlugin.genData.classRoomAssets.ToArray();
+            __instance.ld.potentialFacultyRooms = EndlessFloorsPlugin.genData.facultyRoomAssets.ToArray();
+            __instance.ld.randomEvents = EndlessFloorsPlugin.genData.randomEvents;
+            while (__instance.ld.maxEvents > (__instance.ld.randomEvents.Count + 5))
+            {
+                __instance.ld.randomEvents.AddRange(__instance.ld.randomEvents);
+            }
+            __instance.ld.maxEventGap = currentFD.classRoomCount <= 19 ? 130f : 120f;
+            __instance.ld.minEventGap = currentFD.classRoomCount >= 14 ? 30f : 60f;
+            __instance.ld.maxOffices = Mathf.Max(currentFD.maxOffices, 1);
+            __instance.ld.minOffices = 1;
+            __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
+            __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);
+
+            Baldi myBladi = (Baldi)MTM101BaldiDevAPI.npcMetadata.Get(Character.Baldi).prefabs["Baldi_Main" + currentFD.myFloorBaldi];
+
+            __instance.ld.potentialBaldis = new WeightedNPC[1] {
+                new WeightedNPC()
+                {
+                    weight = 420,
+                    selection = myBladi
+                }
+            };
+
+            List<ObjectBuilder> extraObjs = new List<ObjectBuilder>();
+
+            WeightedObjectBuilder[] possibleExtraBuilders = EndlessFloorsPlugin.genData.objectBuilders.ToArray();
+
+            int extraBuilders = rng.Next(2, Mathf.Min(2 + Mathf.FloorToInt(currentFD.FloorID / 5), 12));
+
+            for (int i = 0; i < extraBuilders; i++)
+            {
+                extraObjs.Add(WeightedObjectBuilder.ControlledRandomSelection(possibleExtraBuilders, rng));
+            }
+
+            //move this last so the other stuff has room to generate
+            extraObjs.Add(MTM101BaldiDevAPI.objBuilderMeta.Get(Obstacle.Null, "PlantBuilder").value);
+
+            __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
+
+            __instance.ld.specialHallBuilders = EndlessFloorsPlugin.genData.randomObjectBuilders.ToArray();
+
+            /*
+            __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.weightedNPCs.Count);
             System.Random rng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
 
             //custom npc handling because. honestly i don't think there is any reason for it anymore but im too lazy to undo all this code so
@@ -82,17 +227,6 @@ namespace BaldiEndless
                 ForcedNPCS.Add(selectedNpc);
             }
 
-            // switch out the baldi for the one that is closest to our current notebook count
-            Baldi myBladi = EndlessFloorsPlugin.TheBladis.FindLast(x => x.name.Contains("Main" + currentFD.myFloorBaldi));
-
-            __instance.ld.potentialBaldis = new WeightedNPC[1] {
-                new WeightedNPC()
-                {
-                    weight = 420,
-                    selection = myBladi
-                }
-            };
-
             rng = new System.Random(Singleton<CoreGameManager>.Instance.Seed() + __instance.seedOffset);
 
             EndlessFloorsPlugin.currentSceneObject.skybox = EndlessFloorsPlugin.skyBoxes[rng.Next(0, 1)];
@@ -100,84 +234,6 @@ namespace BaldiEndless
             __instance.ld.forcedNpcs = ForcedNPCS.ToArray();
             __instance.ld.potentialNPCs = new List<WeightedNPC>();
             __instance.Ec.npcsToSpawn = new List<NPC>();
-            __instance.ld.minSpecialRooms = currentFD.minGiantRooms;
-            __instance.ld.maxSpecialRooms = currentFD.maxGiantRooms;
-
-            __instance.ld.maxEventGap = currentFD.classRoomCount <= 19 ? 130f : 120f;
-            __instance.ld.minEventGap = currentFD.classRoomCount >= 14 ? 30f : 60f;
-
-            __instance.ld.maxOffices = Mathf.Max(currentFD.maxOffices, 1);
-            __instance.ld.minOffices = 1;
-
-            //use the regular seed without the offset so it stays consistent
-            System.Random lightRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
-
-            //cause why not
-            lightRng.Next();
-            lightRng.Next();
-
-            Color warmColor = new Color(255f / 255f, 202 / 255f, 133 / 255f);
-            Color coldColor = new Color(133f / 255f, 161f / 255f, 255f / 255f);
-
-            float coldLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + rng.Next(-50, 50))), 0f);
-            float warmLight = Mathf.Max(Mathf.Sin(((currentFD.FloorID / (1f + (float)(rng.NextDouble() * 15f))) + rng.Next(-50, 50))), 0f);
-
-            __instance.ld.standardLightColor = Color.Lerp(Color.Lerp(Color.white, coldColor, coldLight), warmColor, warmLight);
-
-            if (currentFD.FloorID % 99 == 0)
-            {
-                __instance.ld.standardLightColor = Color.Lerp(__instance.ld.standardLightColor, Color.red, 0.3f);
-            }
-
-            __instance.ld.randomEvents = new List<WeightedRandomEvent>
-            {
-                new WeightedRandomEvent()
-                {
-                    weight = 150,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Fog)
-                },
-                new WeightedRandomEvent()
-                {
-                    weight = 125,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Party)
-                },
-                new WeightedRandomEvent()
-                {
-                    weight = 70,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Snap)
-                },
-                new WeightedRandomEvent()
-                {
-                    weight = 90,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Flood)
-                },
-                new WeightedRandomEvent()
-                {
-                    weight = 60,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Lockdown)
-                }
-            };
-
-            if (currentFD.classRoomCount >= 6)
-            {
-                __instance.ld.randomEvents.Add(new WeightedRandomEvent()
-                {
-                    weight = 75,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.Gravity)
-                });
-            }
-
-            if (currentFD.classRoomCount >= 8)
-            {
-                __instance.ld.randomEvents.Add(new WeightedRandomEvent()
-                {
-                    weight = 40,
-                    selection = EndlessFloorsPlugin.randomEvents.FindLast(x => x.Type == RandomEventType.MysteryRoom)
-                });
-            }
-
-            __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
-            __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);
 
             if (__instance.ld.maxEvents > (__instance.ld.randomEvents.Count + 5))
             {
@@ -187,81 +243,6 @@ namespace BaldiEndless
                     __instance.ld.randomEvents.Add(__instance.ld.randomEvents[rng.Next(0, __instance.ld.randomEvents.Count - 2)]); //do -2 instead of -1 to exclude some things
                 }
             }
-
-            __instance.ld.exitCount = currentFD.exitCount;
-
-            __instance.ld.additionTurnChance = (int)(currentFD.unclampedScaleVar / 2);
-            __instance.ld.minClassRooms = currentFD.classRoomCount;
-            __instance.ld.maxClassRooms = currentFD.classRoomCount;
-
-            __instance.ld.windowChance = Mathf.Max((currentFD.FloorID * -1.2f) + 14, 2);
-
-            __instance.ld.mapPrice = currentFD.FloorID * 25;
-
-            __instance.ld.maxPlots = currentFD.maxPlots;
-
-            __instance.ld.minPlots = currentFD.minPlots;
-
-            __instance.ld.outerEdgeBuffer = 3;
-
-            __instance.ld.bridgeTurnChance = Mathf.CeilToInt(Mathf.Clamp(currentFD.exitCount, 1f, 5f) * 3f); //lol
-
-            __instance.ld.itemChance = (int)currentFD.itemChance;
-
-            __instance.ld.maxSideHallsToRemove = Mathf.FloorToInt(currentFD.classRoomCount / 5);
-            __instance.ld.minSideHallsToRemove = Mathf.CeilToInt(currentFD.classRoomCount / 7);
-
-            __instance.ld.maxLightDistance = Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID / 3), 1, 9);
-
-            float rgb = Mathf.Max(16f, 255f - (currentFD.FloorID * 6));
-
-            __instance.ld.standardDarkLevel = new Color(rgb / 255, rgb / 255, rgb / 255);
-
-            __instance.ld.standardLightStrength = Mathf.Max(Mathf.RoundToInt(4f / (currentFD.FloorID / 24f)), 3);
-
-            __instance.ld.maxFacultyRooms = currentFD.maxFacultyRoomCount;
-            __instance.ld.minFacultyRooms = currentFD.minFacultyRoomCount;
-
-            __instance.ld.maxSpecialBuilders = Mathf.RoundToInt(currentFD.unclampedScaleVar / 11f);
-            __instance.ld.minSpecialBuilders = Mathf.RoundToInt((currentFD.unclampedScaleVar / 11f) / 1.5f);
-
-            List<ObjectBuilder> extraObjs = new List<ObjectBuilder>();
-
-            WeightedObjectBuilder[] possibleExtraBuilders = new WeightedObjectBuilder[]
-            {
-                new WeightedObjectBuilder()
-                {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.name == "PayphoneBuilder"),
-                    weight = 60
-                },
-                new WeightedObjectBuilder()
-                {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.name == "BsodaHallBuilder"),
-                    weight = 100
-                },
-                new WeightedObjectBuilder()
-                {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.name == "ZestyHallBuilder"),
-                    weight = 100
-                },
-                new WeightedObjectBuilder()
-                {
-                    selection = EndlessFloorsPlugin.objBuilders.Find(x => x.obstacle == Obstacle.Fountain),
-                    weight = 80
-                },
-            };
-
-            int extraBuilders = rng.Next(2, Mathf.Min(2 + Mathf.FloorToInt(currentFD.FloorID / 5), 12));
-
-            for (int i = 0; i < extraBuilders; i++)
-            {
-                extraObjs.Add(WeightedObjectBuilder.ControlledRandomSelection(possibleExtraBuilders, rng));
-            }
-
-            //move this last so the other stuff has room to generate
-            extraObjs.Add(EndlessFloorsPlugin.objBuilders.Find(x => x.name == "PlantBuilder"));
-
-            __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
 
             __instance.ld.specialHallBuilders = new WeightedObjectBuilder[5]
             {
@@ -308,15 +289,6 @@ namespace BaldiEndless
                 }
             };
 
-            /*if (EndlessFloorsPlugin.TimesInstalled)
-            {
-                __instance.ld.classBuilders = __instance.ld.classBuilders.AddToArray(new WeightedRoomBuilder()
-                {
-                    selection = Resources.FindObjectsOfTypeAll<ClassBuilder>().ToList().Find(x => x.name == "CustomRoomBuilder_Messy Class Builder"),
-                    weight = 90
-                });
-            }*/
-
             __instance.ld.specialRooms = new WeightedSpecialRoomCreator[]
             {
                 new WeightedSpecialRoomCreator()
@@ -361,23 +333,7 @@ namespace BaldiEndless
                 }
             };
 
-            __instance.ld.fieldTrip = ((currentFD.FloorID % 4 == 0) && currentFD.FloorID != 4) || currentFD.FloorID % 99 == 0;
-
-            __instance.ld.items = EndlessFloorsPlugin.weightedItems;
-
-            __instance.ld.hallWallTexs = EndlessFloorsPlugin.wallTextures.ToArray();
-            __instance.ld.classWallTexs = EndlessFloorsPlugin.wallTextures.ToArray();
-            __instance.ld.facultyWallTexs = EndlessFloorsPlugin.facultyWallTextures.ToArray();
-
-            __instance.ld.classCeilingTexs = EndlessFloorsPlugin.ceilTextures.ToArray();
-            __instance.ld.hallCeilingTexs = EndlessFloorsPlugin.ceilTextures.ToArray();
-            __instance.ld.facultyCeilingTexs = EndlessFloorsPlugin.ceilTextures.ToArray();
-
-            __instance.ld.hallFloorTexs = EndlessFloorsPlugin.floorTextures.ToArray();
-            __instance.ld.facultyFloorTexs = EndlessFloorsPlugin.profFloorTextures.ToArray();
-            __instance.ld.classFloorTexs = EndlessFloorsPlugin.profFloorTextures.ToArray();
-
-            __instance.ld.finalLevel = false; // THERE IS NO END
+            */
 
         }
     }
