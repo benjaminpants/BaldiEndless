@@ -29,9 +29,9 @@ namespace BaldiEndless
     {
         public static void Postfix(EnvironmentController __instance, NPC npc)
         {
-            /*float moveSpeed = 0f;
+            float moveSpeed = 0f;
             int unclampedCount = EndlessFloorsPlugin.currentFloorData.npcCountUnclamped;
-            int clampedCount = Mathf.Min(unclampedCount, EndlessFloorsPlugin.weightedNPCs.Count);
+            int clampedCount = Mathf.Min(unclampedCount, EndlessFloorsPlugin.lastGenMaxNpcs);
             bool isBaldi = npc.Character == Character.Baldi;
             if (Mathf.Abs(clampedCount - unclampedCount) >= 3)
             {
@@ -41,7 +41,7 @@ namespace BaldiEndless
             {
                 MovementModifier mm = new MovementModifier(Vector3.zero, moveSpeed);
                 __instance.Npcs.Last().GetComponent<ActivityModifier>().moveMods.Add(mm);
-            }*/
+            }
         }
     }
 

@@ -69,13 +69,13 @@ namespace BaldiEndless
                 selections.RemoveAll(x => object.Equals(x.selection, selectedValue)); //thank you stack overflow for saving my ass
                 newL.Add(selectedValue);
             }
-            Debug.Log(count);
-            Debug.Log(newL.Count);
+
             return newL;
         }
 
         static List<T> CreateShuffledListWithCount<T>(List<T> list, int count, System.Random rng)
         {
+            count = Math.Min(list.Count,count);
             List<T> newList = new List<T>();
             List<T> copiedList = list.ToList(); // create a duplicate list
             for (int i = 0; i < count; i++)
@@ -92,6 +92,7 @@ namespace BaldiEndless
             FloorData currentFD = EndlessFloorsPlugin.currentFloorData;
             GeneratorData genData = new GeneratorData();
             EndlessFloorsPlugin.ExtendGenData(genData);
+            EndlessFloorsPlugin.lastGenMaxNpcs = genData.npcs.Count;
             __instance.ld.items = genData.items.ToArray();
             __instance.seedOffset = currentFD.FloorID;
             __instance.ld.minSize = new IntVector2(currentFD.minSize, currentFD.minSize);
@@ -137,7 +138,7 @@ namespace BaldiEndless
 
             // npc logic
             __instance.ld.potentialNPCs = new List<WeightedNPC>();
-            __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, genData.npcs.Count);
+            __instance.ld.additionalNPCs = Mathf.Max(Mathf.Min(currentFD.npcCountUnclamped, genData.npcs.Count),1);
             stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
             stableRng.Next();
             __instance.ld.forcedNpcs = CreateWeightedShuffledListWithCount<WeightedNPC, NPC>(genData.npcs, __instance.ld.additionalNPCs, stableRng).ToArray();
@@ -166,7 +167,7 @@ namespace BaldiEndless
             __instance.ld.potentialFacultyRooms = CreateShuffledListWithCount(genData.facultyRoomAssets, 4 + Mathf.FloorToInt(currentFD.FloorID / 4), rng).ToArray();
 
 
-            __instance.ld.exitCount = currentFD.exitCount;
+            __instance.ld.exitCount = Mathf.Min(currentFD.exitCount, 4); //todo: figure out why the old patch isn't working
             __instance.ld.additionTurnChance = (int)(currentFD.unclampedScaleVar / 2);
             __instance.ld.minClassRooms = currentFD.classRoomCount;
             __instance.ld.maxClassRooms = currentFD.classRoomCount;
@@ -221,23 +222,24 @@ namespace BaldiEndless
                 }
             };
 
-            List<ObjectBuilder> extraObjs = new List<ObjectBuilder>();
-
-            WeightedObjectBuilder[] possibleExtraBuilders = genData.randomObjectBuilders.ToArray();
-
-            int extraBuilders = rng.Next(2, Mathf.Min(2 + Mathf.FloorToInt(currentFD.FloorID / 5), 12));
-
-            for (int i = 0; i < extraBuilders; i++)
-            {
-                extraObjs.Add(WeightedObjectBuilder.ControlledRandomSelection(possibleExtraBuilders, rng));
-            }
-
-            //move this last so the other stuff has room to generate
-            extraObjs.Add(MTM101BaldiDevAPI.objBuilderMeta.Get(Obstacle.Null, "PlantBuilder").value);
-
-            __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
-
+            __instance.ld.forcedSpecialHallBuilders = genData.forcedObjectBuilders.ToArray();
+            
             __instance.ld.specialHallBuilders = genData.objectBuilders.ToArray();
+
+            __instance.ld.minSpecialRooms = currentFD.minGiantRooms;
+            __instance.ld.maxSpecialRooms = currentFD.maxGiantRooms;
+            __instance.ld.potentialSpecialRooms = genData.specialRoomAssets.ToArray();
+
+            __instance.ld.potentialOffices = genData.officeRoomAssets.ToArray();
+
+            // special hallways, blegh
+            __instance.ld.minPostPlotSpecialHalls = 0;
+            __instance.ld.maxPostPlotSpecialHalls = 0;
+            __instance.ld.minPrePlotSpecialHalls = currentFD.minSpecialHalls;
+            __instance.ld.maxPrePlotSpecialHalls = currentFD.maxSpecialHalls;
+            __instance.ld.potentialPostPlotSpecialHalls = new WeightedRoomAsset[0];
+            __instance.ld.potentialPrePlotSpecialHalls = genData.hallInsertions.ToArray();
+            __instance.ld.prePlotSpecialHallChance = 0.5f;
 
             /*
             __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.weightedNPCs.Count);

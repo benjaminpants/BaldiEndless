@@ -102,6 +102,22 @@ namespace BaldiEndless
             }
         }
 
+        public int maxSpecialHalls
+        {
+            get
+            {
+                return Mathf.FloorToInt(maxSize / 30f);
+            }
+        }
+
+        public int minSpecialHalls
+        {
+            get
+            {
+                return Mathf.FloorToInt(maxSpecialHalls / 3f);
+            }
+        }
+
         public float itemChance
         {
             get

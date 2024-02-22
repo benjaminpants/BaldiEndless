@@ -38,6 +38,7 @@ namespace BaldiEndless
 
         public int highestFloorCount = 1;
         public int selectedFloor = 1;
+        public static int lastGenMaxNpcs = 0;
 
         public string lastAllocatedPath = "";
 
@@ -267,7 +268,12 @@ namespace BaldiEndless
                     selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_1").value
                 },
             });
-            genData.randomObjectBuilders.AddRange(new WeightedObjectBuilder[]
+            genData.forcedObjectBuilders.AddRange(new ObjectBuilder[]
+            {
+                objs.Get(Obstacle.Null, "SwingDoorBuilder").value,
+                objs.Get(Obstacle.Null, "PlantBuilder").value,
+            });
+            genData.objectBuilders.AddRange(new WeightedObjectBuilder[]
             {
                 new WeightedObjectBuilder()
                 {
@@ -438,10 +444,51 @@ namespace BaldiEndless
                     selection = items.FindByEnum(Items.ZestyBar).value,
                     weight = 70
                 },
-                new WeightedItemObject()
+                /*new WeightedItemObject()
                 {
                     selection = EndlessFloorsPlugin.presentObject,
                     weight = 74
+                }*/
+            });
+            genData.specialRoomAssets.AddRange(new WeightedRoomAsset[] { 
+                new WeightedRoomAsset()
+                {
+                    weight = 200,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Cafeteria1").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 200,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Library1").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 200,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Playground_1").value
+                }
+            });
+            genData.officeRoomAssets.AddRange(new WeightedRoomAsset[] {
+                new WeightedRoomAsset()
+                {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Office, "Room_Office_0").value
+                }
+            });
+            genData.hallInsertions.AddRange(new WeightedRoomAsset[] {
+                new WeightedRoomAsset()
+                {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Hall, "Room_HallFormation_0").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Hall, "Room_HallFormation_1").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Hall, "Room_HallFormation_2").value
                 }
             });
             foreach (KeyValuePair<PluginInfo, Action<GeneratorData>> kvp in genActions)
