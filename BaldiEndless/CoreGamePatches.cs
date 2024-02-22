@@ -57,11 +57,11 @@ namespace BaldiEndless
             //__instance.Ec.Players[0].itm.AddItem(EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.GrapplingHook));
             if ((Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode) || (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free))
             {
-                /*if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
+                if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
                 {
                     UnityEngine.Object.Destroy(Singleton<ElevatorScreen>.Instance.gameObject);
                     Singleton<CoreGameManager>.Instance.Quit();
-                }*/
+                }
             }
         }
     }

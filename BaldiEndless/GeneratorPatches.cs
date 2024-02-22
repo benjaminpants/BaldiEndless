@@ -3,6 +3,7 @@ using MTM101BaldAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -59,24 +60,28 @@ namespace BaldiEndless
 
         static List<T2> CreateWeightedShuffledListWithCount<T, T2>(List<T> list, int count, System.Random rng) where T : WeightedSelection<T2>
         {
-            List<T> newL = new List<T>();
+            List<T2> newL = new List<T2>();
             List<T> selections = list.ToList();
             for (int i = 0; i < count; i++)
             {
-                T selectedValue = WeightedSelection<T2>.ControlledRandomSelectionList(selections, rng);
-                selections.RemoveAll(x => EqualityComparer<T2>.Default.Equals(x.selection, selectedValue)); //thank you stack overflow for saving my ass
+                // this is literally the worst fucking thing that i think anyone has written
+                T2 selectedValue = (T2)AccessTools.Method(typeof(T), "ControlledRandomSelection").Invoke(null, new object[] { selections.ToArray(), rng  });//.ControlledRandomSelectionList(selections, rng);
+                selections.RemoveAll(x => object.Equals(x.selection, selectedValue)); //thank you stack overflow for saving my ass
                 newL.Add(selectedValue);
             }
+            Debug.Log(count);
+            Debug.Log(newL.Count);
             return newL;
         }
 
-        static List<T> CreateShuffledListWithCount<T>(List<T> list, int startingCount, int addCount, System.Random rng)
+        static List<T> CreateShuffledListWithCount<T>(List<T> list, int count, System.Random rng)
         {
             List<T> newList = new List<T>();
             List<T> copiedList = list.ToList(); // create a duplicate list
-            for (int i = 0; i < startingCount + addCount; i++)
+            for (int i = 0; i < count; i++)
             {
                 int selectedIndex = rng.Next(0, copiedList.Count);
+                newList.Add(copiedList[selectedIndex]);
                 copiedList.RemoveAt(selectedIndex);
             }
             return newList;
@@ -85,6 +90,9 @@ namespace BaldiEndless
         static void Prefix(LevelGenerator __instance)
         {
             FloorData currentFD = EndlessFloorsPlugin.currentFloorData;
+            GeneratorData genData = new GeneratorData();
+            EndlessFloorsPlugin.ExtendGenData(genData);
+            __instance.ld.items = genData.items.ToArray();
             __instance.seedOffset = currentFD.FloorID;
             __instance.ld.minSize = new IntVector2(currentFD.minSize, currentFD.minSize);
             __instance.ld.maxSize = new IntVector2(currentFD.maxSize, currentFD.maxSize);
@@ -129,10 +137,34 @@ namespace BaldiEndless
 
             // npc logic
             __instance.ld.potentialNPCs = new List<WeightedNPC>();
-            __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.genData.npcs.Count);
+            __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, genData.npcs.Count);
             stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
             stableRng.Next();
-            __instance.ld.forcedNpcs = CreateWeightedShuffledListWithCount<NPC>(EndlessFloorsPlugin.genData.npcs, __instance.ld.additionalNPCs, stableRng).ToArray();
+            __instance.ld.forcedNpcs = CreateWeightedShuffledListWithCount<WeightedNPC, NPC>(genData.npcs, __instance.ld.additionalNPCs, stableRng).ToArray();
+            __instance.ld.forcedNpcs = __instance.ld.forcedNpcs.AddRangeToArray<NPC>(genData.forcedNpcs.ToArray());
+            stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
+            stableRng.Next();
+            stableRng.Next();
+
+            List<WeightedRoomAsset> wra = CreateShuffledListWithCount(genData.classRoomAssets, 3 + Mathf.FloorToInt(currentFD.FloorID / 3), rng);
+
+            wra.Do((x) =>
+            {
+                if (x.selection.hasActivity)
+                {
+                    x.weight = (int)Math.Ceiling(x.weight * (currentFD.FloorID * 0.1));
+                }
+            });
+
+            __instance.ld.potentialClassRooms = wra.ToArray();
+
+            stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
+            stableRng.Next();
+            stableRng.Next();
+            stableRng.Next();
+
+            __instance.ld.potentialFacultyRooms = CreateShuffledListWithCount(genData.facultyRoomAssets, 4 + Mathf.FloorToInt(currentFD.FloorID / 4), rng).ToArray();
+
 
             __instance.ld.exitCount = currentFD.exitCount;
             __instance.ld.additionTurnChance = (int)(currentFD.unclampedScaleVar / 2);
@@ -167,9 +199,7 @@ namespace BaldiEndless
             __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
             __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);
 
-            __instance.ld.potentialClassRooms = EndlessFloorsPlugin.genData.classRoomAssets.ToArray();
-            __instance.ld.potentialFacultyRooms = EndlessFloorsPlugin.genData.facultyRoomAssets.ToArray();
-            __instance.ld.randomEvents = EndlessFloorsPlugin.genData.randomEvents;
+            __instance.ld.randomEvents = genData.randomEvents;
             while (__instance.ld.maxEvents > (__instance.ld.randomEvents.Count + 5))
             {
                 __instance.ld.randomEvents.AddRange(__instance.ld.randomEvents);
@@ -193,7 +223,7 @@ namespace BaldiEndless
 
             List<ObjectBuilder> extraObjs = new List<ObjectBuilder>();
 
-            WeightedObjectBuilder[] possibleExtraBuilders = EndlessFloorsPlugin.genData.objectBuilders.ToArray();
+            WeightedObjectBuilder[] possibleExtraBuilders = genData.randomObjectBuilders.ToArray();
 
             int extraBuilders = rng.Next(2, Mathf.Min(2 + Mathf.FloorToInt(currentFD.FloorID / 5), 12));
 
@@ -207,7 +237,7 @@ namespace BaldiEndless
 
             __instance.ld.forcedSpecialHallBuilders = extraObjs.ToArray();
 
-            __instance.ld.specialHallBuilders = EndlessFloorsPlugin.genData.randomObjectBuilders.ToArray();
+            __instance.ld.specialHallBuilders = genData.objectBuilders.ToArray();
 
             /*
             __instance.ld.additionalNPCs = Mathf.Min(currentFD.npcCountUnclamped, EndlessFloorsPlugin.weightedNPCs.Count);

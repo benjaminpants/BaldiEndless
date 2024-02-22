@@ -27,14 +27,14 @@ namespace BaldiEndless
         public SceneObject[] SceneObjects;
         public static SceneObject currentSceneObject;
 
-        public static GeneratorData genData = new GeneratorData();
-
         public static EndlessFloorsPlugin Instance { get; private set; }
 
         public static Mode NNFloorMode = EnumExtensions.ExtendEnum<Mode>("Floor99");
 
         public static string F99MusicStart = "";
         public static string F99MusicLoop = "";
+
+        internal static Dictionary<PluginInfo, Action<GeneratorData>> genActions = new Dictionary<PluginInfo, Action<GeneratorData>>();
 
         public int highestFloorCount = 1;
         public int selectedFloor = 1;
@@ -110,6 +110,351 @@ namespace BaldiEndless
                 if (bald.name == "HappyBaldi") return "HappyBaldi1";
                 return bald.name;
             }); //we need the happy baldis
+            SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
+            currentSceneObject = SceneObjects.Where(x => x.levelTitle == "F3").First();
+        }
+
+        internal static void ExtendGenData(GeneratorData genData)
+        {
+            NPCMetaStorage npcs = MTM101BaldiDevAPI.npcMetadata;
+            RoomAssetMetaStorage rooms = MTM101BaldiDevAPI.roomAssetMeta;
+            ObjectBuilderMetaStorage objs = MTM101BaldiDevAPI.objBuilderMeta;
+            RandomEventMetaStorage rngs = MTM101BaldiDevAPI.rngEvStorage;
+            ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
+            genData.npcs.AddRange(new WeightedNPC[]
+            {
+                new WeightedNPC() {
+                    weight = 90,
+                    selection = npcs.Get(Character.Playtime).value
+                },
+                new WeightedNPC() {
+                    weight = 100,
+                    selection = npcs.Get(Character.Sweep).value
+                },
+                new WeightedNPC() {
+                    weight = 110,
+                    selection = npcs.Get(Character.Beans).value
+                },
+                new WeightedNPC() {
+                    weight = 85,
+                    selection = npcs.Get(Character.Bully).value
+                },
+                new WeightedNPC() {
+                    weight = 80,
+                    selection = npcs.Get(Character.Crafters).value
+                },
+                new WeightedNPC() { //chalkles is actual hell to deal with since 0.4
+                    weight = 80,
+                    selection = npcs.Get(Character.Chalkles).value
+                },
+                new WeightedNPC() {
+                    weight = 10,
+                    selection = npcs.Get(Character.LookAt).value
+                },
+                new WeightedNPC() {
+                    weight = 90,
+                    selection = npcs.Get(Character.Pomp).value
+                },
+                new WeightedNPC() {
+                    weight = 95,
+                    selection = npcs.Get(Character.Cumulo).value
+                },
+                new WeightedNPC() {
+                    weight = 70,
+                    selection = npcs.Get(Character.Prize).value
+                },
+                new WeightedNPC() {
+                    weight = 90,
+                    selection = npcs.Get(Character.DrReflex).value
+                },
+            });
+            genData.forcedNpcs.Add(npcs.Get(Character.Principal).value);
+            genData.classRoomAssets.AddRange(new WeightedRoomAsset[]
+            {
+                new WeightedRoomAsset() {
+                    weight = 75,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_NoActivity_0").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 75,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_NoActivity_1").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_NoActivity_3").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_NoActivity_4").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 75,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_MathMachine_0").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 75,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_MathMachine_1").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_MathMachine_2").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_MathMachine_3").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 50,
+                    selection = rooms.Get(RoomCategory.Class, "Room_Class_MathMachine_4").value
+                }
+            });
+            genData.facultyRoomAssets.AddRange(new WeightedRoomAsset[]
+            {
+                new WeightedRoomAsset() {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_2").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 50,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_6").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 100,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_7").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 50,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_9").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 50,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_11").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 25,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_0").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 50,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_3").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 50,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_4").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 25,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_5").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 75,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_6").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 10,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_8").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 75,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_10").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 10,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_12").value
+                },
+                new WeightedRoomAsset() {
+                    weight = 10,
+                    selection = rooms.Get(RoomCategory.Faculty, "Room_Faculty_School_1").value
+                },
+            });
+            genData.randomObjectBuilders.AddRange(new WeightedObjectBuilder[]
+            {
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.Null, "PayphoneBuilder").value,
+                    weight = 60
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.Null, "BsodaHallBuilder").value,
+                    weight = 100
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.Null, "ZestyHallBuilder").value,
+                    weight = 100
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.Fountain, "WaterFountainHallBuilder").value,
+                    weight = 80
+                }
+            });
+            genData.objectBuilders.AddRange(new WeightedObjectBuilder[]
+            {
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.Conveyor, "ConveyorBeltBuilder").value,
+                    weight = 110
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.CoinDoor, "CoinDoorBuilder").value,
+                    weight = 90
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.OneWaySwing, "OneWayDoorBuilder").value,
+                    weight = 80
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.LockdownDoor, "LockdownDoorBuilder").value,
+                    weight = 85
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.Null, "RotoHallBuilder").value,
+                    weight = 90
+                }
+            });
+            genData.randomEvents.AddRange(new WeightedRandomEvent[]
+            {
+                new WeightedRandomEvent()
+                {
+                    selection = rngs.Get(RandomEventType.Fog).value,
+                    weight = 150
+                },
+                new WeightedRandomEvent()
+                {
+                    selection = rngs.Get(RandomEventType.Party).value,
+                    weight = 125
+                },
+                new WeightedRandomEvent()
+                {
+                    selection = rngs.Get(RandomEventType.Snap).value,
+                    weight = 70
+                },
+                new WeightedRandomEvent()
+                {
+                    selection = rngs.Get(RandomEventType.Flood).value,
+                    weight = 90
+                },
+                new WeightedRandomEvent()
+                {
+                    selection = rngs.Get(RandomEventType.Lockdown).value,
+                    weight = 65
+                },
+                new WeightedRandomEvent()
+                {
+                    selection = rngs.Get(RandomEventType.Gravity).value,
+                    weight = 55
+                },
+                new WeightedRandomEvent()
+                {
+                    selection = rngs.Get(RandomEventType.MysteryRoom).value,
+                    weight = 50
+                }
+            });
+            genData.items.AddRange(new WeightedItemObject[]
+            {
+                new WeightedItemObject() 
+                {
+                    selection = items.FindByEnum(Items.Quarter).value,
+                    weight = 60
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.AlarmClock).value,
+                    weight = 55
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Apple).value,
+                    weight = 1
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Boots).value,
+                    weight = 55
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.ChalkEraser).value,
+                    weight = 80
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.DetentionKey).value,
+                    weight = 40
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.GrapplingHook).value,
+                    weight = 25
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Nametag).value,
+                    weight = 45
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Wd40).value,
+                    weight = 60
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.PortalPoster).value,
+                    weight = 20
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.PrincipalWhistle).value,
+                    weight = 50
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Scissors).value,
+                    weight = 80
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.DoorLock).value,
+                    weight = 42
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Tape).value,
+                    weight = 40
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Teleporter).value,
+                    weight = 25
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.ZestyBar).value,
+                    weight = 70
+                },
+                new WeightedItemObject()
+                {
+                    selection = EndlessFloorsPlugin.presentObject,
+                    weight = 74
+                }
+            });
+            foreach (KeyValuePair<PluginInfo, Action<GeneratorData>> kvp in genActions)
+            {
+                try
+                {
+                    kvp.Value.Invoke(genData);
+                }
+                catch (Exception e)
+                {
+                    MTM101BaldiDevAPI.CauseCrash(kvp.Key, e);
+                }
+            }
         }
 
         void Awake()
@@ -167,6 +512,9 @@ namespace BaldiEndless
             Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
             presentObject = ObjectCreators.CreateItemObject("Itm_Present", "Itm_Present", presentSprite, presentSprite, presentEnum, 9999, 26);
             DontDestroyOnLoad(presentObject.item = new GameObject().AddComponent<ITM_Present>()); // WHAT THE FUCK THIS IS ACTUALLY VALID SYNTAX I WAS FUCKING JOKING
+            ItemMetaData meta = new ItemMetaData(this.Info, presentObject);
+            meta.flags = ItemFlags.NoInventory | ItemFlags.NoUses;
+            presentObject.AddMeta(meta);
             ModdedSaveSystem.AddSaveLoadAction(this, SaveLoadHighestFloor);
             StartCoroutine(WaitTilAllLoaded(harmony));
 
@@ -193,9 +541,9 @@ namespace BaldiEndless
         public void UpdateData(ref SceneObject sceneObject)
         {
             sceneObject = currentSceneObject;
-            //sceneObject.levelNo = currentSave.currentFloorData.FloorID;
+            sceneObject.levelNo = currentSave.currentFloor;
             sceneObject.nextLevel = sceneObject;
-            //sceneObject.levelTitle = "F" + currentSave.currentFloorData.FloorID;
+            sceneObject.levelTitle = "F" + currentSave.currentFloor;
         }
     }
 
