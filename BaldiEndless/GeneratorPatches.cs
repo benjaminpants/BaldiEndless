@@ -167,7 +167,7 @@ namespace BaldiEndless
             __instance.ld.potentialFacultyRooms = CreateShuffledListWithCount(genData.facultyRoomAssets, 4 + Mathf.FloorToInt(currentFD.FloorID / 4), rng).ToArray();
 
 
-            __instance.ld.exitCount = Mathf.Min(currentFD.exitCount, 4); //todo: figure out why the old patch isn't working
+            __instance.ld.exitCount = currentFD.exitCount;
             __instance.ld.additionTurnChance = (int)(currentFD.unclampedScaleVar / 2);
             __instance.ld.minClassRooms = currentFD.classRoomCount;
             __instance.ld.maxClassRooms = currentFD.classRoomCount;

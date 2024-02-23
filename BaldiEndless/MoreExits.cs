@@ -7,7 +7,6 @@ using System.Diagnostics;
 
 namespace BaldiEndless
 {
-    [ConditionalPatchNever]
     [HarmonyPatch(typeof(Directions))]
     [HarmonyPatch("All")]
     class AllowStuff
@@ -17,7 +16,6 @@ namespace BaldiEndless
             
             if (EndlessFloorsPlugin.currentFloorData.exitCount <= 4) return true;
             System.Reflection.MethodBase fo = (new System.Diagnostics.StackTrace()).GetFrame(2).GetMethod(); //gets the thing that called it
-            UnityEngine.Debug.Log(fo.Name);
             if (fo.Name == "MoveNext")
             {
                 List<Direction> directions = new List<Direction>
