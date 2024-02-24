@@ -47,7 +47,28 @@ namespace BaldiEndless
         static void Prefix(ref SceneObject sceneObject)
         {
             EndlessFloorsPlugin.currentSave = new EndlessSaveData();
+            EndlessFloorsPlugin.currentSave.startingFloor = EndlessFloorsPlugin.Instance.selectedFloor;
             EndlessFloorsPlugin.currentFloorData.FloorID = EndlessFloorsPlugin.Instance.selectedFloor;
+            if ((EndlessFloorsPlugin.Instance.selectedFloor != 1) && (Singleton<CoreGameManager>.Instance.currentMode != EndlessFloorsPlugin.NNFloorMode))
+            {
+                Singleton<CoreGameManager>.Instance.AddPoints(FloorData.GetYTPsAtFloor(EndlessFloorsPlugin.Instance.selectedFloor), 0, false);
+            }
+            if (EndlessFloorsPlugin.Instance.selectedFloor >= 16)
+            {
+                EndlessFloorsPlugin.currentSave.Counters["slots"] = 5;
+            }
+            else if (EndlessFloorsPlugin.Instance.selectedFloor >= 12)
+            {
+                EndlessFloorsPlugin.currentSave.Counters["slots"] = 4;
+            }
+            else if (EndlessFloorsPlugin.Instance.selectedFloor >= 9)
+            {
+                EndlessFloorsPlugin.currentSave.Counters["slots"] = 3;
+            }
+            else if (EndlessFloorsPlugin.Instance.selectedFloor >= 6)
+            {
+                EndlessFloorsPlugin.currentSave.Counters["slots"] = 2;
+            }
             EndlessFloorsPlugin.Instance.UpdateData(ref sceneObject);
         }
     }

@@ -1,5 +1,7 @@
 ﻿using AlmostEngine;
 using HarmonyLib;
+using MTM101BaldAPI;
+using MTM101BaldAPI.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,6 +23,58 @@ namespace BaldiEndless
         }
 
 
+    }
+
+    [HarmonyPatch(typeof(BaseGameManager))]
+    [HarmonyPatch("BeginSpoopMode")]
+    class OnSpoopMode
+    {
+        static void Postfix(BaseGameManager __instance)
+        {
+            if (EndlessFloorsPlugin.currentSave.HasUpgrade("autotag"))
+            {
+                Item theTag = GameObject.Instantiate(MTM101BaldiDevAPI.itemMetadata.FindByEnum(Items.Nametag).value.item);
+                theTag.gameObject.SetActive(true);
+                if (EndlessFloorsPlugin.currentSave.GetUpgradeCount("autotag") == 2)
+                {
+                    ITM_Nametag tag = theTag.GetComponent<ITM_Nametag>();
+                    tag.ReflectionSetVariable("setTime", 60f);
+                }
+                theTag.Use(__instance.Ec.Players[0]);
+            }
+            __instance.Ec.Players[0].plm.staminaMax += EndlessFloorsPlugin.currentSave.GetUpgradeCount("stamina") * 25;
+            // Singleton<CoreGameManager>.Instance.AddPoints(10000,0,true);
+            //__instance.Ec.Players[0].plm.stamina = __instance.Ec.Players[0].plm.staminaMax;
+        }
+    }
+
+    [HarmonyPatch(typeof(EnvironmentController))]
+    [HarmonyPatch("SetElevators")]
+    class OnElevator
+    {
+        static FieldInfo hasPlayer = AccessTools.Field(typeof(ColliderGroup), "hasPlayer");
+        static void Postfix(EnvironmentController __instance, bool enable)
+        {
+            if (!enable) return;
+            if (EndlessFloorsPlugin.currentSave.HasUpgrade("freeexit"))
+            {
+                List<int> possibleElevators = new List<int>();
+                for (int i = 0; i < __instance.elevators.Count; i++)
+                {
+                    possibleElevators.Add(i);
+                }
+                int elevatorsToClose = EndlessFloorsPlugin.currentSave.GetUpgradeCount("freeexit");
+                while (elevatorsToClose > 0)
+                {
+                    int random = UnityEngine.Random.Range(0,possibleElevators.Count);
+                    int selectedId = possibleElevators[random];
+                    possibleElevators.RemoveAt(random);
+                    Elevator toClose = __instance.elevators[selectedId];
+                    hasPlayer.SetValue(toClose.ColliderGroup, true); //there is totally a player here yes absolutely DO NOT QUESTION ANYTHING THERE IS A PLAYER HERE
+                    elevatorsToClose--;
+                }
+            }
+        }
     }
 
     [HarmonyPatch(typeof(EnvironmentController))]

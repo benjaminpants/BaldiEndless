@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace BaldiEndless
 {
-    public struct UpgradeData
+    public struct UpgradeSaveData
     {
         public string id { private set; get; } //to ensure people have to create a new upgradedata if they want to change the id
         public byte count;
 
-        public UpgradeData(string id, byte count)
+        public UpgradeSaveData(string id, byte count)
         {
             this.id = id;
             this.count = count;
@@ -22,7 +23,88 @@ namespace BaldiEndless
     {
         public FloorData myFloorData = new FloorData();
 
-        public UpgradeData[] Upgrades = new UpgradeData[5] { new UpgradeData("none", 0), new UpgradeData("none", 0), new UpgradeData("none", 0), new UpgradeData("none", 0), new UpgradeData("none", 0) };
+        public UpgradeSaveData[] Upgrades = new UpgradeSaveData[5] { new UpgradeSaveData("none", 0), new UpgradeSaveData("none", 0), new UpgradeSaveData("none", 0), new UpgradeSaveData("none", 0), new UpgradeSaveData("none", 0) };
+        public Dictionary<string, byte> Counters = new Dictionary<string, byte>();
+
+        public EndlessSaveData()
+        {
+            Counters.Add("slots",1);
+        }
+
+        public int startingFloor = 1;
+        public bool claimedFreePoints = false;
+        public byte itemSlots => Counters["slots"];
+
+        public bool HasUpgrade(string type) => GetUpgradeCount(type) > 0;
+
+        public int GetUpgradeCount(string type)
+        {
+            if (Counters.ContainsKey(type)) return Counters[type];
+            for (int i = 0; i < Upgrades.Length; i++)
+            {
+                if (Upgrades[i].id == type)
+                {
+                    return Upgrades[i].count;
+                }
+            }
+            return 0;
+        }
+
+        public void SellUpgrade(string id)
+        {
+            for (int i = 0; i < Upgrades.Length; i++)
+            {
+                if (Upgrades[i].id == id)
+                {
+                    if (Upgrades[i].count == 1)
+                    {
+                        Upgrades[i] = new UpgradeSaveData("none",0);
+                        return;
+                    }
+                    Upgrades[i].count--;
+                    return;
+                }
+            }
+        }
+
+        public bool PurchaseUpgrade(StandardUpgrade upgrade, UpgradePurchaseBehavior behavior)
+        {
+            switch (behavior)
+            {
+                case UpgradePurchaseBehavior.IncrementCounter:
+                    if (!Counters.ContainsKey(upgrade.id))
+                    {
+                        Counters.Add(upgrade.id,0);
+                    }
+                    if (Counters[upgrade.id] == byte.MaxValue)
+                    {
+                        return false;
+                    }
+                    Counters[upgrade.id]++;
+                    return true;
+                case UpgradePurchaseBehavior.Nothing:
+                    return true;
+                case UpgradePurchaseBehavior.FillUpgradeSlot:
+                    for (int i = 0; i < Upgrades.Length; i++)
+                    {
+                        if (Upgrades[i].id == upgrade.id)
+                        {
+                            Upgrades[i].count++;
+                            return true;
+                        }
+                    }
+                    for (int i = 0; i < Upgrades.Length; i++)
+                    {
+                        if (Upgrades[i].id == "none")
+                        {
+                            Upgrades[i] = new UpgradeSaveData(upgrade.id, 1);
+                            return true;
+                        }
+                    }
+                    return false;
+            }
+            throw new NotImplementedException("Not Implemented:" + behavior.ToString());
+        }
 
         public int currentFloor {
             get
@@ -39,11 +121,20 @@ namespace BaldiEndless
         {
             writer.Write((byte)0); //format version
             writer.Write(currentFloor);
+            writer.Write(startingFloor);
+            writer.Write(claimedFreePoints);
+            writer.Write(itemSlots);
             writer.Write((byte)Upgrades.Length);
             for (int i = 0; i < Upgrades.Length; i++)
             {
                 writer.Write(Upgrades[i].id);
                 writer.Write(Upgrades[i].count);
+            }
+            writer.Write(Counters.Count);
+            foreach (KeyValuePair<string, byte> item in Counters)
+            {
+                writer.Write(item.Key);
+                writer.Write(item.Value);
             }
         }
     }

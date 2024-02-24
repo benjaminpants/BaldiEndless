@@ -27,6 +27,8 @@ namespace BaldiEndless
         public SceneObject[] SceneObjects;
         public static SceneObject currentSceneObject;
 
+        public static Dictionary<string, StandardUpgrade> Upgrades = new Dictionary<string, StandardUpgrade>();
+
         public static EndlessFloorsPlugin Instance { get; private set; }
 
         public static Mode NNFloorMode = EnumExtensions.ExtendEnum<Mode>("Floor99");
@@ -49,7 +51,7 @@ namespace BaldiEndless
 
         public static FloorData currentFloorData => currentSave.myFloorData;
 
-        public static Texture2D upgradeTex5;
+        public static Texture2D upgradeTex5 => (Texture2D)Instance.assetManager[typeof(Texture2D), "UpgradeSlot5"];
         public static List<WeightedTexture2D> wallTextures = new List<WeightedTexture2D>();
         public static List<WeightedTexture2D> facultyWallTextures = new List<WeightedTexture2D>();
         public static List<WeightedTexture2D> ceilTextures = new List<WeightedTexture2D>();
@@ -113,6 +115,90 @@ namespace BaldiEndless
             }); //we need the happy baldis
             SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
             currentSceneObject = SceneObjects.Where(x => x.levelTitle == "F3").First();
+            ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
+            ITM_Present.potentialObjects.AddRange(new WeightedItemObject[]
+            {
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Quarter).value,
+                    weight = 60
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.AlarmClock).value,
+                    weight = 55
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Apple).value,
+                    weight = 1
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Boots).value,
+                    weight = 55
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.ChalkEraser).value,
+                    weight = 80
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.DetentionKey).value,
+                    weight = 40
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.GrapplingHook).value,
+                    weight = 25
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Nametag).value,
+                    weight = 45
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Wd40).value,
+                    weight = 60
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.PortalPoster).value,
+                    weight = 20
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.PrincipalWhistle).value,
+                    weight = 50
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Scissors).value,
+                    weight = 80
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.DoorLock).value,
+                    weight = 42
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Tape).value,
+                    weight = 40
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Teleporter).value,
+                    weight = 25
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.ZestyBar).value,
+                    weight = 70
+                },
+            });
         }
 
         internal static void ExtendGenData(GeneratorData genData)
@@ -444,11 +530,11 @@ namespace BaldiEndless
                     selection = items.FindByEnum(Items.ZestyBar).value,
                     weight = 70
                 },
-                /*new WeightedItemObject()
+                new WeightedItemObject()
                 {
                     selection = EndlessFloorsPlugin.presentObject,
                     weight = 74
-                }*/
+                }
             });
             genData.specialRoomAssets.AddRange(new WeightedRoomAsset[] { 
                 new WeightedRoomAsset()
@@ -553,7 +639,8 @@ namespace BaldiEndless
             AddWeightedTextures(ref floorTextures, "Floors");
             AddWeightedTextures(ref profFloorTextures, "ProfFloors");
 
-            upgradeTex5 = AssetLoader.TextureFromMod(this, "UpgradeSlot5.png");
+            assetManager.Add("UpgradeSlot5", AssetLoader.TextureFromMod(this, "UpgradeSlot5.png"));
+            assetManager.Add("OutOfOrderSlot", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "MissingSlot.png")));
 
             Texture2D presentTex = AssetLoader.TextureFromMod(this, "PresentIcon_Large.png");
             Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
@@ -569,7 +656,36 @@ namespace BaldiEndless
             string midiPath = Path.Combine(myPath, "Midi");
             EndlessFloorsPlugin.F99MusicStart = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
             EndlessFloorsPlugin.F99MusicLoop = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
-
+            EndlessUpgradeRegisters.Register(new StandardUpgrade()
+            {
+                id = "none",
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="NO",
+                        cost=0,
+                        descLoca="Upg_None"
+                    }
+                },
+                weight = 0
+            });
+            EndlessUpgradeRegisters.Register(new BrokenUpgrade()
+            {
+                id = "error",
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="Error",
+                        cost=0,
+                        descLoca="Upg_Error"
+                    }
+                },
+                weight = 0,
+                behavior=UpgradePurchaseBehavior.Nothing
+            });
+            EndlessUpgradeRegisters.RegisterDefaults();
             MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(OnResourcesLoaded, true);
 
         }
