@@ -278,7 +278,7 @@ namespace BaldiEndless
             Register(new SlotUpgrade()
             {
                 id = "slots",
-                weight = 60,
+                weight = 65,
                 behavior=UpgradePurchaseBehavior.IncrementCounter,
                 levels = new UpgradeLevel[]
                 {
@@ -291,19 +291,19 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=50,
+                        cost=100,
                         descLoca="Upg_ItemSlot"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=150,
+                        cost=300,
                         descLoca="Upg_ItemSlot"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=250,
+                        cost=600,
                         descLoca="Upg_ItemSlot"
                     },
                     new UpgradeLevel()
@@ -415,19 +415,19 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ClockSlow",
-                        cost=450,
+                        cost=400,
                         descLoca="Upg_Timeslow"
                     },
                     new UpgradeLevel()
                     {
                         icon="ClockSlow2",
-                        cost=750,
+                        cost=550,
                         descLoca="Upg_Timeslow2"
                     },
                     new UpgradeLevel()
                     {
                         icon="ClockSlow3",
-                        cost=1250,
+                        cost=850,
                         descLoca="Upg_Timeslow3"
                     }
                 }
