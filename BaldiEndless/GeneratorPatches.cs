@@ -121,7 +121,19 @@ namespace BaldiEndless
             __instance.ld.previousLevels = new LevelObject[0];
 
             __instance.ld.timeBonusVal = 1 * currentFD.FloorID;
-            __instance.ld.fieldTrip = false;//((currentFD.FloorID % 4 == 0) && currentFD.FloorID != 4) || currentFD.FloorID % 99 == 0;
+            __instance.ld.fieldTrip = ((currentFD.FloorID % 4 == 0) && currentFD.FloorID != 4) || currentFD.FloorID % 99 == 0;
+            __instance.ld.fieldTrips = genData.fieldTrips.ToArray();
+            /*int avgWeight = 0;
+            for (int i = 0; i < genData.items.Count; i++)
+            {
+                avgWeight += genData.items[i].weight;
+            }
+            avgWeight /= genData.items.Count;*/
+            //__instance.ld.fieldTripItems = genData.items.Where(x => x.weight > avgWeight).ToArray();
+            SceneObject floor2 = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2");
+            __instance.ld.fieldTripItems = floor2.levelObject.fieldTripItems; //TODO: DONT FUCKING DO THIS
+            __instance.ld.tripEntrancePre = floor2.levelObject.tripEntrancePre;
+            __instance.ld.tripEntranceRoom = floor2.levelObject.tripEntranceRoom;
 
             __instance.ld.hallWallTexs = EndlessFloorsPlugin.wallTextures.ToArray();
             __instance.ld.classWallTexs = EndlessFloorsPlugin.wallTextures.ToArray();

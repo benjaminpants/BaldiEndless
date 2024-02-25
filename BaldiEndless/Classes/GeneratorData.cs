@@ -18,6 +18,7 @@ namespace BaldiEndless
         public List<WeightedRoomAsset> specialRoomAssets => roomAssets[RoomCategory.Special];
         public List<WeightedRoomAsset> officeRoomAssets => roomAssets[RoomCategory.Office];
         public List<WeightedRoomAsset> hallInsertions => roomAssets[RoomCategory.Hall];
+        public List<WeightedFieldTrip> fieldTrips = new List<WeightedFieldTrip>();
 
         public GeneratorData()
         {

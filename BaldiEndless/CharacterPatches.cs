@@ -5,9 +5,23 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using UnityEngine;
 
 namespace BaldiEndless
 {
+
+    [HarmonyPatch(typeof(NoLateTeacher))]
+    [HarmonyPatch("PlayerCaught")]
+    class PompIncreasedTime
+    {
+        static void Prefix(NoLateTeacher __instance, ref float ___classTime, ref int ___successPoints)
+        {
+            float timeIncrease = Mathf.Floor((EndlessFloorsPlugin.currentFloorData.classRoomCount * 5f) / 60f)*60f;
+            ___classTime = Mathf.Min(120f + (timeIncrease), 540f);
+            //___successPoints = 100 - (EndlessFloorsPlugin.currentSave.pompIncreaseMinutes * 15);
+        }
+    }
+
     [HarmonyPatch(typeof(Bully))]
     [HarmonyPatch("StealItem")]
     class BullyStealPatch
