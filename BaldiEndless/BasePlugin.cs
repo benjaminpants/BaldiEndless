@@ -14,6 +14,7 @@ using UnityEngine.Rendering;
 using System.Collections;
 using System.Xml.Linq;
 using MTM101BaldAPI.Registers;
+using MTM101BaldAPI.Reflection;
 
 namespace BaldiEndless
 {
@@ -105,6 +106,62 @@ namespace BaldiEndless
             }
         }
 
+        // Ripped From Fade
+        static Texture2D FlipX(Texture2D texture)
+        {
+            Texture2D flipped = new Texture2D(texture.width, texture.height);
+
+            int width = texture.width;
+            int height = texture.height;
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    flipped.SetPixel(width - i - 1, j, texture.GetPixel(i, j));
+                }
+            }
+            flipped.Apply();
+
+            return flipped;
+        }
+
+        static Texture2D FlipY(Texture2D texture)
+        {
+            Texture2D flipped = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+
+            int width = texture.width;
+            int height = texture.height;
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    flipped.SetPixel(i, height - j - 1, texture.GetPixel(i, j));
+                }
+            }
+            flipped.Apply();
+
+            return flipped;
+        }
+
+        static Cubemap CubemapFromTexture2D(Texture2D texture)
+        {
+            texture = FlipX(texture);
+            texture = FlipY(texture);
+
+            int cubemapWidth = texture.width / 6;
+            Cubemap cubemap = new Cubemap(cubemapWidth, TextureFormat.ARGB32, false);
+            cubemap.SetPixels(texture.GetPixels(0 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.NegativeZ);
+            cubemap.SetPixels(texture.GetPixels(1 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.PositiveZ);
+            cubemap.SetPixels(texture.GetPixels(2 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.NegativeY);
+            cubemap.SetPixels(texture.GetPixels(3 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.PositiveY);
+            cubemap.SetPixels(texture.GetPixels(4 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.NegativeX);
+            cubemap.SetPixels(texture.GetPixels(5 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.PositiveX);
+            cubemap.Apply();
+            return cubemap;
+        }
+
         // once all resources have been loaded
         void OnResourcesLoaded()
         {
@@ -113,10 +170,32 @@ namespace BaldiEndless
                 if (bald.name == "HappyBaldi") return "HappyBaldi1";
                 return bald.name;
             }); //we need the happy baldis
+            assetManager.AddRange<Cubemap>(Resources.FindObjectsOfTypeAll<Cubemap>().Where(x => (x.name == "Cubemap_DayStandard" || x.name == "Cubemap_Twilight")).ToArray());
+            Cubemap darkCubemap = CubemapFromTexture2D(AssetLoader.TextureFromMod(this, "DarkSky_OneImage.png"));
+            /*Cubemap templateMap = (Cubemap)assetManager[typeof(Cubemap), "Cubemap_Default"];
+            Cubemap newCubemap = new Cubemap(256, templateMap.format, false);
+            newCubemap.filterMode = FilterMode.Point;
+            Texture2D tex = AssetLoader.TextureFromMod(this, "DarkSky.png");
+            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.PositiveY);
+            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.PositiveX);
+            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.PositiveZ);
+            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.NegativeZ);
+            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.NegativeX);
+            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.NegativeY);
+            newCubemap.name = "Cubemap_DarkSky";
+            newCubemap.Apply();*/
+            darkCubemap.name = "Cubemap_DarkSky";
+            assetManager.Add<Cubemap>("Cubemap_DarkSky", darkCubemap);
             SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
             currentSceneObject = SceneObjects.Where(x => x.levelTitle == "F3").First();
             // obliterate CONVEYOR BELT SUBTITLES
             Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "ConveyorBeltLoop").First().subtitle = false; //MYSTMAN12!!!!!!
+            // make outside area lighting change based on skybox
+            RoomFunctionContainer container = MTM101BaldiDevAPI.roomAssetMeta.Get(RoomCategory.Special, "Room_Playground_1").value.roomFunctionContainer;
+            List<RoomFunction> funcs = (List<RoomFunction>)container.ReflectionGetVariable("functions");
+            funcs.Remove(container.GetComponent<SunlightRoomFunction>());
+            UnityEngine.Object.Destroy(container.GetComponent<SunlightRoomFunction>());
+            container.AddFunction(container.gameObject.AddComponent<CustomTimeLightFunction>());
             ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
             ITM_Present.potentialObjects.AddRange(new WeightedItemObject[]
             {
@@ -711,6 +790,20 @@ namespace BaldiEndless
             sceneObject.levelNo = currentSave.currentFloor;
             sceneObject.nextLevel = sceneObject;
             sceneObject.levelTitle = "F" + currentSave.currentFloor;
+            System.Random random = new System.Random(currentSave.currentFloor + Singleton<CoreGameManager>.Instance.Seed());
+            random.Next();
+            sceneObject.manager.ReflectionSetVariable("happyBaldiPre", assetManager[typeof(HappyBaldi), "HappyBaldi" + random.Next(1, 3)]);
+            random = new System.Random((currentSave.currentFloor * 2) + Singleton<CoreGameManager>.Instance.Seed());
+            random.Next();
+            random.Next();
+            float timeOffset = (float)(random.NextDouble() * 256f) - 128f;
+            Cubemap[] boxses = new Cubemap[3] {
+                (Cubemap)EndlessFloorsPlugin.Instance.assetManager[typeof(Cubemap), "Cubemap_DayStandard"],
+                (Cubemap)EndlessFloorsPlugin.Instance.assetManager[typeof(Cubemap), "Cubemap_Twilight"],
+                (Cubemap)EndlessFloorsPlugin.Instance.assetManager[typeof(Cubemap), "Cubemap_DarkSky"]
+            };
+            int skyboxIndex = Mathf.RoundToInt(Mathf.Cos(((float)(currentSave.currentFloor) / 6f) + timeOffset)) + 1;
+            sceneObject.skybox = boxses[skyboxIndex];
         }
     }
 

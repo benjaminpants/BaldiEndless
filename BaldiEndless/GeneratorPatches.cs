@@ -140,7 +140,6 @@ namespace BaldiEndless
             System.Random stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
 
             stableRng.Next();
-            stableRng.Next();
 
             System.Random rng = new System.Random(Singleton<CoreGameManager>.Instance.Seed() + __instance.seedOffset);
 
