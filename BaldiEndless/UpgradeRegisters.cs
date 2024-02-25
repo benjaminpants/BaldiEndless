@@ -400,7 +400,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="Favoritism",
-                        cost=400,
+                        cost=350,
                         descLoca="Upg_Favoritism"
                     }
                 }
@@ -415,7 +415,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ClockSlow",
-                        cost=550,
+                        cost=450,
                         descLoca="Upg_Timeslow"
                     },
                     new UpgradeLevel()

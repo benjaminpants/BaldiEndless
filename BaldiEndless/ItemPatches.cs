@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using MTM101BaldAPI;
 using MTM101BaldAPI.Reflection;
+using MTM101BaldAPI.Registers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -111,7 +112,7 @@ namespace BaldiEndless
             {
                 if (Vector3.Distance(npc.transform.position,pm.transform.position) <= pm.pc.reach * 2)
                 {
-                    if (npc.Character != Character.Principal)
+                    if (!elligableNPCs.Contains(npc))
                     {
                         elligableNPCs.Add(npc);
                     }
@@ -124,7 +125,7 @@ namespace BaldiEndless
                 NPC hitNPC = hit.transform.GetComponent<NPC>();
                 if (hitNPC)
                 {
-                    if (hitNPC.Character != Character.Principal)
+                    if (!elligableNPCs.Contains(hitNPC))
                     {
                         elligableNPCs.Add(hitNPC);
                     }
@@ -132,6 +133,9 @@ namespace BaldiEndless
             }
             elligableNPCs.Do(x =>
             {
+                if (x.Character == Character.Principal) return;
+                if (x.Character == Character.Chalkles) return;
+                if (!x.GetMeta().flags.HasFlag(NPCFlags.HasTrigger)) return;
                 _setGuilt.Invoke(x, new object[] { 10f, "Bullying" });
             });
         }
