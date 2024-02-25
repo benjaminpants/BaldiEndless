@@ -52,6 +52,26 @@ namespace BaldiEndless
             {
                 fc.Increment();
             });
+            StandardMenuButton mainB = theMain.GetComponent<StandardMenuButton>();
+            mainB.OnPress = new UnityEvent();
+            mainB.OnPress.AddListener(() =>
+            {
+                GameLoader gl = Resources.FindObjectsOfTypeAll<GameLoader>().First();
+                gl.gameObject.SetActive(true);
+                gl.CheckSeed();
+                gl.Initialize(2);
+                gl.SetMode((int)Mode.Main);
+                ElevatorScreen evl = SceneManager.GetActiveScene().GetRootGameObjects().Where(x => x.name == "ElevatorScreen").First().GetComponent<ElevatorScreen>();
+                gl.AssignElevatorScreen(evl);
+                evl.gameObject.SetActive(true);
+                gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
+                evl.Initialize();
+                if (EndlessFloorsPlugin.Instance.selectedFloor != 1)
+                {
+                    evl.QueueShop();
+                }
+                gl.SetSave(false);
+            });
 
             StandardMenuButton mText = GameObject.Instantiate(theFree.gameObject).GetComponent<StandardMenuButton>();
             mText.transform.parent = theMain.transform.parent;

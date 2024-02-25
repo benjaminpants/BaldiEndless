@@ -1,8 +1,11 @@
 ﻿using HarmonyLib;
 using MTM101BaldAPI;
+using MTM101BaldAPI.Reflection;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -44,6 +47,93 @@ namespace BaldiEndless
         static void Prefix(ITM_BSODA __instance, ref float ___speed)
         {
             ___speed *= 1f - (EndlessFloorsPlugin.currentSave.GetUpgradeCount("slowsoda") * 0.15f);
+        }
+    }
+
+    [HarmonyPatch(typeof(ITM_AlarmClock))]
+    [HarmonyPatch("Use")]
+    class AlarmClockPatch
+    {
+        static FieldInfo _finished = AccessTools.Field(typeof(ITM_AlarmClock), "finished");
+        static FieldInfo _audMan = AccessTools.Field(typeof(EnvironmentController), "audMan");
+        static MethodInfo _Timer = AccessTools.Method(typeof(ITM_AlarmClock), "Timer");
+        static bool Prefix(ITM_AlarmClock __instance, ref EnvironmentController ___ec, PlayerManager pm, Entity ___entity, float[] ___setTime, int ___initSetTime, ref bool __result)
+        {
+            if (!EndlessFloorsPlugin.currentSave.HasUpgrade("timeclock")) return true;
+            // i hate doing this.
+            __instance.StartCoroutine(WaitForCompletion(__instance));
+            ___ec = pm.ec;
+            __instance.transform.position = pm.transform.position;
+            ___entity.Initialize(___ec, __instance.transform.position);
+            __instance.StartCoroutine("Timer", ___setTime[___initSetTime]);
+            __result = true;
+            return false;
+        }
+
+        static IEnumerator WaitForCompletion(ITM_AlarmClock clock)
+        {
+            while (!(bool)_finished.GetValue(clock))
+            {
+                yield return null;
+            }
+            clock.StopCoroutine("Timer"); //dont die until WE are ready!
+            TimeScaleModifier timeMod = new TimeScaleModifier() 
+            {
+                environmentTimeScale = 0f,
+                npcTimeScale = 0f
+            };
+            AudioManager audMan = (AudioManager)_audMan.GetValue(Singleton<BaseGameManager>.Instance.Ec);
+            audMan.PlaySingle((SoundObject)EndlessFloorsPlugin.Instance.assetManager[typeof(SoundObject), "TimeSlow"]);
+            Singleton<BaseGameManager>.Instance.Ec.AddTimeScale(timeMod);
+            float timeToWait = (EndlessFloorsPlugin.currentSave.GetUpgradeCount("timeclock") * 10f);
+            while (timeToWait > 0f)
+            {
+                timeToWait -= Time.deltaTime;
+                yield return null;
+            }
+            Singleton<BaseGameManager>.Instance.Ec.RemoveTimeScale(timeMod);
+            audMan.PlaySingle((SoundObject)EndlessFloorsPlugin.Instance.assetManager[typeof(SoundObject), "TimeFast"]);
+            UnityEngine.Object.Destroy(clock.gameObject);
+            yield break;
+        }
+    }
+
+    [HarmonyPatch(typeof(ITM_PrincipalWhistle))]
+    [HarmonyPatch("Use")]
+    class WhistlePatch
+    {
+        private static MethodInfo _setGuilt = AccessTools.Method(typeof(NPC), "SetGuilt");
+        static void Prefix(ITM_PrincipalWhistle __instance, PlayerManager pm)
+        {
+            if (!EndlessFloorsPlugin.currentSave.HasUpgrade("favor")) return;
+            List<NPC> elligableNPCs = new List<NPC>();
+            foreach (NPC npc in pm.ec.Npcs)
+            {
+                if (Vector3.Distance(npc.transform.position,pm.transform.position) <= pm.pc.reach * 2)
+                {
+                    if (npc.Character != Character.Principal)
+                    {
+                        elligableNPCs.Add(npc);
+                    }
+                }
+            }
+            RaycastHit hit;
+            LayerMask clickMask = new LayerMask() {value=131073}; //copied from ITM_Scissors
+            if (Physics.Raycast(pm.transform.position, Singleton<CoreGameManager>.Instance.GetCamera(pm.playerNumber).transform.forward, out hit, pm.pc.reach*4, clickMask))
+            {
+                NPC hitNPC = hit.transform.GetComponent<NPC>();
+                if (hitNPC)
+                {
+                    if (hitNPC.Character != Character.Principal)
+                    {
+                        elligableNPCs.Add(hitNPC);
+                    }
+                }
+            }
+            elligableNPCs.Do(x =>
+            {
+                _setGuilt.Invoke(x, new object[] { 10f, "Bullying" });
+            });
         }
     }
 

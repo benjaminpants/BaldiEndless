@@ -263,7 +263,7 @@ namespace BaldiEndless
             Register(new StandardUpgrade()
             {
                 id = "hungrybully",
-                weight = 78,
+                weight = 90,
                 levels = new UpgradeLevel[]
                 {
                     new UpgradeLevel()
@@ -311,6 +311,124 @@ namespace BaldiEndless
                         icon="SlotPlus",
                         cost=350,
                         descLoca="Upg_ItemSlot"
+                    }
+                }
+            });
+            // life restore
+            Register(new ExtraLifeUpgrade()
+            {
+                id="life",
+                behavior=UpgradePurchaseBehavior.IncrementCounter,
+                weight=80,
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=200,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=800,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=800,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=1000,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=1400,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=1600,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=1600,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=1650,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=1700,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=1750,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=2000,
+                        descLoca="Upg_ExtraLifeLast"
+                    },
+                }
+            });
+            // favoritism
+            Register(new StandardUpgrade()
+            {
+                id = "favor",
+                weight = 80,
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="Favoritism",
+                        cost=400,
+                        descLoca="Upg_Favoritism"
+                    }
+                }
+            });
+            // timeslow clock
+            Register(new StandardUpgrade()
+            {
+                id = "timeclock",
+                weight = 80,
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="ClockSlow",
+                        cost=550,
+                        descLoca="Upg_Timeslow"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ClockSlow2",
+                        cost=750,
+                        descLoca="Upg_Timeslow2"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ClockSlow3",
+                        cost=1250,
+                        descLoca="Upg_Timeslow3"
                     }
                 }
             });
