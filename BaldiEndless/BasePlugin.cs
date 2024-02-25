@@ -115,6 +115,8 @@ namespace BaldiEndless
             }); //we need the happy baldis
             SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
             currentSceneObject = SceneObjects.Where(x => x.levelTitle == "F3").First();
+            // obliterate CONVEYOR BELT SUBTITLES
+            Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "ConveyorBeltLoop").First().subtitle = false; //MYSTMAN12!!!!!!
             ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
             ITM_Present.potentialObjects.AddRange(new WeightedItemObject[]
             {
