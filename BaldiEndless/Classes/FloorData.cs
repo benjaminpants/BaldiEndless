@@ -90,7 +90,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.RoundToInt(maxSize / 23f);
+                return Mathf.RoundToInt(maxSize / 22f);
             }
         }
 

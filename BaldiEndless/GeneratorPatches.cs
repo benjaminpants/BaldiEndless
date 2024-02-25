@@ -86,6 +86,7 @@ namespace BaldiEndless
             for (int i = 0; i < count; i++)
             {
                 // this is literally the worst fucking thing that i think anyone has written
+                // AND I LITERALLY ONLY END UP USING THIS FUCKING ONCE MEANING MAKING IT GENERICALLY TYPED SERVERS LITERALLY NO PURPOSE. FUCK.
                 T2 selectedValue = (T2)AccessTools.Method(typeof(T), "ControlledRandomSelection").Invoke(null, new object[] { selections.ToArray(), rng  });//.ControlledRandomSelectionList(selections, rng);
                 selections.RemoveAll(x => object.Equals(x.selection, selectedValue)); //thank you stack overflow for saving my ass
                 newL.Add(selectedValue);
@@ -167,11 +168,16 @@ namespace BaldiEndless
             {
                 __instance.ld.standardLightColor = Color.Lerp(__instance.ld.standardLightColor, Color.red, 0.3f);
             }
+            // if only i could remember how this fucking code works
+            float rgb = Mathf.Max(16f, 255f - (currentFD.FloorID * 5));
+            __instance.ld.standardDarkLevel = new Color(rgb / 255, rgb / 255, rgb / 255);
+            __instance.ld.standardLightStrength = Mathf.Max(Mathf.RoundToInt(4f / (currentFD.FloorID / 24f)), 3);
+            __instance.ld.maxLightDistance = stableRng.Next(2, Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID / 2), 2, 12));
 
             // npc logic
             __instance.ld.potentialNPCs = new List<WeightedNPC>();
             __instance.ld.additionalNPCs = Mathf.Max(Mathf.Min(currentFD.npcCountUnclamped, genData.npcs.Count),1);
-            stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
+            stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed()); //reset stableRng since we are no longer doing light stuff
             stableRng.Next();
             __instance.ld.forcedNpcs = CreateWeightedShuffledListWithCount<WeightedNPC, NPC>(genData.npcs, __instance.ld.additionalNPCs, stableRng).ToArray();
             __instance.ld.forcedNpcs = __instance.ld.forcedNpcs.AddRangeToArray<NPC>(genData.forcedNpcs.ToArray());
@@ -200,7 +206,7 @@ namespace BaldiEndless
 
 
             __instance.ld.exitCount = currentFD.exitCount;
-            __instance.ld.additionTurnChance = (int)(currentFD.unclampedScaleVar / 2);
+            __instance.ld.additionTurnChance = (int)Mathf.Clamp((currentFD.unclampedScaleVar / 2), 0f, 35f);
             __instance.ld.minClassRooms = currentFD.classRoomCount;
             __instance.ld.maxClassRooms = currentFD.classRoomCount;
             __instance.ld.windowChance = Mathf.Max((currentFD.FloorID * -1.2f) + 14, 2);
@@ -215,13 +221,6 @@ namespace BaldiEndless
             __instance.ld.maxSideHallsToRemove = Mathf.FloorToInt(currentFD.classRoomCount / 5);
             __instance.ld.minSideHallsToRemove = Mathf.CeilToInt(currentFD.classRoomCount / 7);
 
-            __instance.ld.maxLightDistance = Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID / 3), 1, 9);
-
-            float rgb = Mathf.Max(16f, 255f - (currentFD.FloorID * 5));
-
-            __instance.ld.standardDarkLevel = new Color(rgb / 255, rgb / 255, rgb / 255);
-
-            __instance.ld.standardLightStrength = Mathf.Max(Mathf.RoundToInt(4f / (currentFD.FloorID / 24f)), 3);
 
             __instance.ld.maxFacultyRooms = currentFD.maxFacultyRoomCount;
             __instance.ld.minFacultyRooms = currentFD.minFacultyRoomCount;
@@ -233,16 +232,19 @@ namespace BaldiEndless
             __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);
 
             __instance.ld.randomEvents = genData.randomEvents;
-            while (__instance.ld.maxEvents > (__instance.ld.randomEvents.Count + 5))
+            __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
+            __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3f);
+            // mystman12 put in some code to remove duplicate events, how sad.
+            /*while (__instance.ld.maxEvents > (__instance.ld.randomEvents.Count + 5))
             {
-                __instance.ld.randomEvents.AddRange(__instance.ld.randomEvents);
-            }
+                __instance.ld.randomEvents.AddRange(genData.randomEvents);
+                Debug.Log("ADDING EXTRAS(potentially dangerous!)");
+                Debug.Log(__instance.ld.randomEvents.Count);
+            }*/
             __instance.ld.maxEventGap = currentFD.classRoomCount <= 19 ? 130f : 120f;
             __instance.ld.minEventGap = currentFD.classRoomCount >= 14 ? 30f : 60f;
             __instance.ld.maxOffices = Mathf.Max(currentFD.maxOffices, 1);
             __instance.ld.minOffices = 1;
-            __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
-            __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);
 
             Baldi myBladi = (Baldi)MTM101BaldiDevAPI.npcMetadata.Get(Character.Baldi).prefabs["Baldi_Main" + currentFD.myFloorBaldi];
 

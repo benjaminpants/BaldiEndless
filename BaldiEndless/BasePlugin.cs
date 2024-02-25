@@ -544,7 +544,7 @@ namespace BaldiEndless
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.AlarmClock).value,
-                    weight = 55
+                    weight = 56
                 },
                 new WeightedItemObject()
                 {
