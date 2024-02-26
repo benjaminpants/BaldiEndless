@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using MTM101BaldAPI.SaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,12 +30,15 @@ namespace BaldiEndless
 
         void Start()
         {
+            // TODO: FIX FREERUN! CURRENTLY BROKEN! VERY BAD!
             GameObject.Destroy(gameObject.transform.Find("Endless").gameObject);
             GameObject.Destroy(gameObject.transform.Find("Challenge").gameObject);
             GameObject.Destroy(gameObject.transform.Find("FieldTrips").gameObject);
             GameObject.Destroy(gameObject.transform.Find("Endless").gameObject);
+            GameObject.Destroy(gameObject.transform.Find("MainContinue").gameObject);
             Transform theFree = gameObject.transform.Find("Free");
             Transform theMain = gameObject.transform.Find("MainNew");
+            theMain.gameObject.SetActive(true);
             Transform modeText = gameObject.transform.Find("ModeText");
             //Transform seedInput = gameObject.transform.Find("SeedInput");
             theFree.localPosition = new Vector3(0f, theFree.localPosition.y - 48f, theFree.localPosition.z);
@@ -56,21 +60,77 @@ namespace BaldiEndless
             mainB.OnPress = new UnityEvent();
             mainB.OnPress.AddListener(() =>
             {
+                bool saveAvailable = Singleton<ModdedFileManager>.Instance.saveData.saveAvailable;
                 GameLoader gl = Resources.FindObjectsOfTypeAll<GameLoader>().First();
                 gl.gameObject.SetActive(true);
-                gl.CheckSeed();
-                gl.Initialize(2);
-                gl.SetMode((int)Mode.Main);
+                if (!saveAvailable)
+                {
+                    gl.CheckSeed();
+                    gl.Initialize(2);
+                    gl.SetMode((int)Mode.Main);
+                    // reset everything save related
+                    EndlessFloorsPlugin.mainSave = new EndlessSaveData();
+                    EndlessFloorsPlugin.mainSave.startingFloor = EndlessFloorsPlugin.Instance.selectedFloor;
+                    EndlessFloorsPlugin.currentFloorData.FloorID = EndlessFloorsPlugin.Instance.selectedFloor;
+                    if ((EndlessFloorsPlugin.Instance.selectedFloor != 1) && (Singleton<CoreGameManager>.Instance.currentMode != EndlessFloorsPlugin.NNFloorMode))
+                    {
+                        Singleton<CoreGameManager>.Instance.AddPoints(FloorData.GetYTPsAtFloor(EndlessFloorsPlugin.Instance.selectedFloor), 0, false);
+                    }
+                    if (EndlessFloorsPlugin.Instance.selectedFloor >= 16)
+                    {
+                        EndlessFloorsPlugin.currentSave.Counters["slots"] = 5;
+                    }
+                    else if (EndlessFloorsPlugin.Instance.selectedFloor >= 12)
+                    {
+                        EndlessFloorsPlugin.currentSave.Counters["slots"] = 4;
+                    }
+                    else if (EndlessFloorsPlugin.Instance.selectedFloor >= 9)
+                    {
+                        EndlessFloorsPlugin.currentSave.Counters["slots"] = 3;
+                    }
+                    else if (EndlessFloorsPlugin.Instance.selectedFloor >= 6)
+                    {
+                        EndlessFloorsPlugin.currentSave.Counters["slots"] = 2;
+                    }
+                }
+                else
+                {
+                    EndlessFloorsPlugin.Instance.selectedFloor = 1; //so all my old hacky code presumes we are starting an entirely new game?
+                    Singleton<ModdedFileManager>.Instance.CreateSavedGameCoreManager(gl);
+                    gl.SetMode((int)Mode.Main);
+                    Singleton<CursorManager>.Instance.LockCursor();
+                }
                 ElevatorScreen evl = SceneManager.GetActiveScene().GetRootGameObjects().Where(x => x.name == "ElevatorScreen").First().GetComponent<ElevatorScreen>();
                 gl.AssignElevatorScreen(evl);
                 evl.gameObject.SetActive(true);
                 gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
                 evl.Initialize();
-                if (EndlessFloorsPlugin.Instance.selectedFloor != 1)
+                if (!saveAvailable)
                 {
-                    evl.QueueShop();
+                    if (EndlessFloorsPlugin.Instance.selectedFloor != 1)
+                    {
+                        evl.QueueShop();
+                    }
                 }
-                gl.SetSave(false);
+                gl.SetSave(true);
+                if (saveAvailable)
+                {
+                    Singleton<ModdedFileManager>.Instance.DeleteSavedGame();
+                }
+            });
+            mainB.OnHighlight = new UnityEvent();
+            mainB.OnHighlight.AddListener(() =>
+            {
+                if (Singleton<ModdedFileManager>.Instance.saveData.saveAvailable)
+                {
+                    modeText.gameObject.GetComponent<TextLocalizer>().GetLocalizedText("Men_ContDesc");
+                    TextMeshProUGUI ugui = modeText.gameObject.GetComponent<TextMeshProUGUI>();
+                    ugui.text = String.Format(ugui.text, EndlessFloorsPlugin.mainSave.currentFloor, EndlessFloorsPlugin.mainSave.startingFloor);
+                }
+                else
+                {
+                    modeText.gameObject.GetComponent<TextLocalizer>().GetLocalizedText("Men_MainDesc");
+                }
             });
 
             StandardMenuButton mText = GameObject.Instantiate(theFree.gameObject).GetComponent<StandardMenuButton>();
@@ -93,9 +153,14 @@ namespace BaldiEndless
                 gl.AssignElevatorScreen(evl);
                 evl.gameObject.SetActive(true);
                 EndlessFloorsPlugin.Instance.selectedFloor = 99;
+                // reset everything save related
+                EndlessFloorsPlugin._99Save = new EndlessSaveData();
+                EndlessFloorsPlugin._99Save.startingFloor = EndlessFloorsPlugin.Instance.selectedFloor;
+                EndlessFloorsPlugin.currentFloorData.FloorID = EndlessFloorsPlugin.Instance.selectedFloor;
                 gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
                 evl.Initialize();
                 Singleton<CoreGameManager>.Instance.AddPoints(9999 * 2, 0, false);
+                EndlessFloorsPlugin.currentSave.Counters["slots"] = 5;
                 evl.QueueShop();
                 gl.SetSave(false);
             });
@@ -161,6 +226,7 @@ namespace BaldiEndless
         }
     }
 
+    // todo: replace this with. i dont know, something that makes MORE SENSE??? like a transpiler instead of whatever the hell this is.
     [HarmonyPatch(typeof(EnvironmentController))]
     [HarmonyPatch("SpawnNPCs")]
     public class TemporarySwitchMode

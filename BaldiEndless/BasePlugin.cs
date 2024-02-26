@@ -48,7 +48,35 @@ namespace BaldiEndless
         public static Items presentEnum = EnumExtensions.ExtendEnum<Items>("Present");
         public static ItemObject presentObject;
 
-        public static EndlessSaveData currentSave = new EndlessSaveData();
+        public static EndlessSaveData mainSave = new EndlessSaveData();
+        internal static EndlessSaveData _99Save = new EndlessSaveData();
+
+        public static EndlessSaveData currentSave
+        {
+            get
+            {
+                if (Singleton<CoreGameManager>.Instance != null)
+                {
+                    if (Singleton<CoreGameManager>.Instance.currentMode == NNFloorMode)
+                    {
+                        return _99Save;
+                    }
+                }
+                return mainSave;
+            }
+            set
+            {
+                if (Singleton<CoreGameManager>.Instance != null)
+                {
+                    if (Singleton<CoreGameManager>.Instance.currentMode == NNFloorMode)
+                    {
+                        _99Save = value;
+                        return;
+                    }
+                }
+                mainSave = value;
+            }
+        }
 
         public static FloorData currentFloorData => currentSave.myFloorData;
 
@@ -680,7 +708,6 @@ namespace BaldiEndless
         {
             Instance = this;
             Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.endlessfloors");
-            MTM101BaldiDevAPI.SavesEnabled = false;
             string myPath = AssetLoader.GetModPath(this);
             string iconPath = Path.Combine(myPath, "UpgradeIcons");
             foreach (string p in Directory.GetFiles(iconPath))
@@ -774,6 +801,7 @@ namespace BaldiEndless
                 behavior=UpgradePurchaseBehavior.Nothing
             });
             EndlessUpgradeRegisters.RegisterDefaults();
+            MTM101BaldAPI.SaveSystem.ModdedSaveGame.AddSaveHandler(new EndlessFloorsSaveHandler());
             MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(OnResourcesLoaded, true);
 
         }

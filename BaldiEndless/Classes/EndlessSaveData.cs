@@ -117,13 +117,12 @@ namespace BaldiEndless
             }
         }
 
-        public void Save(ref BinaryWriter writer)
+        public void Save(BinaryWriter writer)
         {
             writer.Write((byte)0); //format version
             writer.Write(currentFloor);
             writer.Write(startingFloor);
             writer.Write(claimedFreePoints);
-            writer.Write(itemSlots);
             writer.Write((byte)Upgrades.Length);
             for (int i = 0; i < Upgrades.Length; i++)
             {
@@ -136,6 +135,27 @@ namespace BaldiEndless
                 writer.Write(item.Key);
                 writer.Write(item.Value);
             }
+        }
+
+        public static EndlessSaveData Load(BinaryReader reader)
+        {
+            EndlessSaveData data = new EndlessSaveData();
+            data.Counters.Clear();
+            byte version = reader.ReadByte();
+            data.currentFloor = reader.ReadInt32();
+            data.startingFloor = reader.ReadInt32();
+            data.claimedFreePoints = reader.ReadBoolean();
+            int upgradeLength = reader.ReadByte();
+            for (int i = 0; i < upgradeLength; i++)
+            {
+                data.Upgrades[i] = new UpgradeSaveData(reader.ReadString(), reader.ReadByte());
+            }
+            int counterCount = reader.ReadInt32();
+            for (int i = 0; i < counterCount; i++)
+            {
+                data.Counters.Add(reader.ReadString(), reader.ReadByte());
+            }
+            return data;
         }
     }
 }

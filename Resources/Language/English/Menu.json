@@ -2,6 +2,7 @@
 
 {"key":"Men_Floor","value":"Floor: "},
 {"key":"Men_MainDesc","value":"Play an endless gauntlet of floors while trying to escape Baldi!\nHow many floors can you complete?"},
+{"key":"Men_ContDesc","value":"<color=green>Resume your endless gauntlet of floors right where you left off!\n(Floor {0} starting from {1})</color>"},
 {"key":"But_MainMode","value":"Arcade"},
 {"key":"But_FreeMode","value":"Freerun"},
 {"key":"Men_FreeDesc","value":"Explore any floor you've played in Arcade mode to your hearts content!"},
