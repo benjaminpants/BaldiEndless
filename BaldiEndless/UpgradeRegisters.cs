@@ -443,19 +443,19 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ExtraPermaLife",
-                        cost=1,
+                        cost=1000,
                         descLoca="Upg_BonusLife"
                     },
                     new UpgradeLevel()
                     {
                         icon="ExtraPermaLife",
-                        cost=3,
+                        cost=3000,
                         descLoca="Upg_BonusLife"
                     },
                     new UpgradeLevel()
                     {
                         icon="ExtraPermaLife",
-                        cost=6,
+                        cost=6000,
                         descLoca="Upg_BonusLife"
                     }
                 },
