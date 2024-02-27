@@ -6,6 +6,7 @@ namespace BaldiEndless
 {
     public static class EndlessUpgradeRegisters
     {
+        // NOTE TO MODDERS: IF YOU WANT TO CREATE YOUR OWN UPGRADES AS A SEPERATE MOD, INHERIT FROM STANDARDUPGRADE AND OVERRIDE THE GETICON FUNCTION!!
         public static void Register(StandardUpgrade upgrade)
         {
             EndlessFloorsPlugin.Upgrades.Add(upgrade.id, upgrade);
@@ -431,6 +432,34 @@ namespace BaldiEndless
                         descLoca="Upg_Timeslow3"
                     }
                 }
+            });
+            // favoritism
+            Register(new BonusLifeUpgrade()
+            {
+                id = "bonuslife",
+                weight = 80,
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraPermaLife",
+                        cost=1,
+                        descLoca="Upg_BonusLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraPermaLife",
+                        cost=3,
+                        descLoca="Upg_BonusLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraPermaLife",
+                        cost=6,
+                        descLoca="Upg_BonusLife"
+                    }
+                },
+                behavior = UpgradePurchaseBehavior.IncrementCounter
             });
         }
     }

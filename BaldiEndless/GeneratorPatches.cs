@@ -13,10 +13,20 @@ namespace BaldiEndless
     [HarmonyPatch("LoadNextLevel")]
     class EternallyStuckV2
     {
-        static void Prefix()
+        static bool Prefix()
         {
+            BonusLifeUpgrade._defaultLives.SetValue(Singleton<BaseGameManager>.Instance, 2 + EndlessFloorsPlugin.currentSave.GetUpgradeCount("bonuslife"));
             SceneObject sceneObject = EndlessFloorsPlugin.currentSceneObject;
             EndlessFloorsPlugin.currentSave.currentFloor += 1;
+            if ((Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode) || (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free))
+            {
+                if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
+                {
+                    UnityEngine.Object.Destroy(Singleton<ElevatorScreen>.Instance.gameObject);
+                    Singleton<CoreGameManager>.Instance.Quit();
+                    return false;
+                }
+            }
             if (!((Singleton<CoreGameManager>.Instance.currentMode == Mode.Free) || (Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode)))
             {
                 if (EndlessFloorsPlugin.currentFloorData.FloorID > EndlessFloorsPlugin.Instance.highestFloorCount)
@@ -37,6 +47,7 @@ namespace BaldiEndless
                 EndlessFloorsPlugin.victoryScene.levelTitle = "LAP1";
                 sceneObject.nextLevel = EndlessFloorsPlugin.victoryScene;
             }*/
+            return true;
         }
     }
 
@@ -101,13 +112,13 @@ namespace BaldiEndless
             __instance.ld.timeBonusVal = 1 * currentFD.FloorID;
             __instance.ld.fieldTrip = ((currentFD.FloorID % 4 == 0) && currentFD.FloorID != 4) || currentFD.FloorID % 99 == 0;
             __instance.ld.fieldTrips = genData.fieldTrips.ToArray();
-            /*int avgWeight = 0;
+            int avgWeight = 0;
             for (int i = 0; i < genData.items.Count; i++)
             {
                 avgWeight += genData.items[i].weight;
             }
-            avgWeight /= genData.items.Count;*/
-            //__instance.ld.fieldTripItems = genData.items.Where(x => x.weight > avgWeight).ToArray();
+            avgWeight /= genData.items.Count;
+            __instance.ld.fieldTripItems = genData.items.Where(x => x.weight > avgWeight).Select(x => new WeightedItem() { weight = x.weight, selection = x.selection}).ToList();
             SceneObject floor2 = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2");
             __instance.ld.fieldTripItems = floor2.levelObject.fieldTripItems; //TODO: DONT FUCKING DO THIS
             __instance.ld.tripEntrancePre = floor2.levelObject.tripEntrancePre;
@@ -153,10 +164,11 @@ namespace BaldiEndless
 
             // npc logic
             __instance.ld.potentialNPCs = new List<WeightedNPC>();
-            __instance.ld.additionalNPCs = Mathf.Max(Mathf.Min(currentFD.npcCountUnclamped, genData.npcs.Count),1);
+            __instance.ld.additionalNPCs = 0;
+            int potNpcs = Mathf.Max(Mathf.Min(currentFD.npcCountUnclamped, genData.npcs.Count),1);
             stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed()); //reset stableRng since we are no longer doing light stuff
             stableRng.Next();
-            __instance.ld.forcedNpcs = CreateWeightedShuffledListWithCount<WeightedNPC, NPC>(genData.npcs, __instance.ld.additionalNPCs, stableRng).ToArray();
+            __instance.ld.forcedNpcs = CreateWeightedShuffledListWithCount<WeightedNPC, NPC>(genData.npcs, potNpcs, stableRng).ToArray();
             __instance.ld.forcedNpcs = __instance.ld.forcedNpcs.AddRangeToArray<NPC>(genData.forcedNpcs.ToArray());
             stableRng = new System.Random(Singleton<CoreGameManager>.Instance.Seed());
             stableRng.Next();

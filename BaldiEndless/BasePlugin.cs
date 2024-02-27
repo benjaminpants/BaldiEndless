@@ -39,7 +39,17 @@ namespace BaldiEndless
 
         internal static Dictionary<PluginInfo, Action<GeneratorData>> genActions = new Dictionary<PluginInfo, Action<GeneratorData>>();
 
+        public static void AddGeneratorAction(PluginInfo info, Action<GeneratorData> data)
+        {
+            if (genActions.ContainsKey(info))
+            {
+                throw new Exception("Can't add already existing generator action!");
+            }
+            genActions.Add(info, data);
+        }
+
         public int highestFloorCount = 1;
+        //public int[] highestFloorStreak = new int[2] {1, 1};
         public int selectedFloor = 1;
         public static int lastGenMaxNpcs = 0;
 
@@ -49,6 +59,7 @@ namespace BaldiEndless
         public static ItemObject presentObject;
 
         public static EndlessSaveData mainSave = new EndlessSaveData();
+        internal static EndlessSaveData freeSave = new EndlessSaveData();
         internal static EndlessSaveData _99Save = new EndlessSaveData();
 
         public static EndlessSaveData currentSave
@@ -61,6 +72,10 @@ namespace BaldiEndless
                     {
                         return _99Save;
                     }
+                    else if (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free)
+                    {
+                        return freeSave;
+                    }
                 }
                 return mainSave;
             }
@@ -71,6 +86,11 @@ namespace BaldiEndless
                     if (Singleton<CoreGameManager>.Instance.currentMode == NNFloorMode)
                     {
                         _99Save = value;
+                        return;
+                    }
+                    else if (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free)
+                    {
+                        freeSave = value;
                         return;
                     }
                 }
@@ -216,8 +236,23 @@ namespace BaldiEndless
             assetManager.Add<Cubemap>("Cubemap_DarkSky", darkCubemap);
             SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
             currentSceneObject = SceneObjects.Where(x => x.levelTitle == "F3").First();
+            float baseGameMultiplier = 1.5f;
+            // add back in the base game textures
+            EndlessFloorsPlugin.wallTextures.AddRange(currentSceneObject.levelObject.classWallTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.wallTextures.AddRange(currentSceneObject.levelObject.hallWallTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.facultyWallTextures.AddRange(currentSceneObject.levelObject.facultyWallTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.ceilTextures.AddRange(currentSceneObject.levelObject.hallCeilingTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.ceilTextures.AddRange(currentSceneObject.levelObject.classCeilingTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.ceilTextures.AddRange(currentSceneObject.levelObject.facultyCeilingTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.floorTextures.AddRange(currentSceneObject.levelObject.hallFloorTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.profFloorTextures.AddRange(currentSceneObject.levelObject.facultyFloorTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
+            EndlessFloorsPlugin.profFloorTextures.AddRange(currentSceneObject.levelObject.classFloorTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
             // obliterate CONVEYOR BELT SUBTITLES
             Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "ConveyorBeltLoop").First().subtitle = false; //MYSTMAN12!!!!!!
+            SoundObject allNotebooks = Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "BAL_AllNotebooks_9").First();
+            allNotebooks.subtitle = false;
+            allNotebooks.soundClip = AssetLoader.AudioClipFromMod(this, "BAL_Notebooks.wav");
+            allNotebooks.MarkAsNeverUnload();
             // make outside area lighting change based on skybox
             RoomFunctionContainer container = MTM101BaldiDevAPI.roomAssetMeta.Get(RoomCategory.Special, "Room_Playground_1").value.roomFunctionContainer;
             List<RoomFunction> funcs = (List<RoomFunction>)container.ReflectionGetVariable("functions");
@@ -315,7 +350,7 @@ namespace BaldiEndless
             NPCMetaStorage npcs = MTM101BaldiDevAPI.npcMetadata;
             RoomAssetMetaStorage rooms = MTM101BaldiDevAPI.roomAssetMeta;
             ObjectBuilderMetaStorage objs = MTM101BaldiDevAPI.objBuilderMeta;
-            RandomEventMetaStorage rngs = MTM101BaldiDevAPI.rngEvStorage;
+            RandomEventMetaStorage rngs = MTM101BaldiDevAPI.randomEventStorage;
             ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
             genData.fieldTrips.Add(new WeightedFieldTrip()
             {
@@ -803,6 +838,8 @@ namespace BaldiEndless
             EndlessUpgradeRegisters.RegisterDefaults();
             MTM101BaldAPI.SaveSystem.ModdedSaveGame.AddSaveHandler(new EndlessFloorsSaveHandler());
             MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(OnResourcesLoaded, true);
+
+            assetManager.AddRange<Sprite>(new Sprite[] { AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes4.png")), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes5.png")), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes6.png")) }, new string[] { "LifeTubes4", "LifeTubes5", "LifeTubes6"});
 
         }
 

@@ -169,6 +169,45 @@ namespace BaldiEndless
                 modeText.gameObject.GetComponent<TextLocalizer>().GetLocalizedText("Men_Floor99Desc");
             });
 
+            StandardMenuButton freeB = theFree.GetComponent<StandardMenuButton>();
+            freeB.OnPress = new UnityEvent();
+            freeB.OnPress.AddListener(() =>
+            {
+                GameLoader gl = Resources.FindObjectsOfTypeAll<GameLoader>().First();
+                gl.gameObject.SetActive(true);
+                gl.CheckSeed();
+                gl.Initialize(2);
+                gl.SetMode((int)Mode.Free);
+                // reset everything save related
+                EndlessFloorsPlugin.freeSave = new EndlessSaveData();
+                EndlessFloorsPlugin.freeSave.startingFloor = EndlessFloorsPlugin.Instance.selectedFloor;
+                EndlessFloorsPlugin.currentFloorData.FloorID = EndlessFloorsPlugin.Instance.selectedFloor;
+                Singleton<CoreGameManager>.Instance.AddPoints(999999, 0, false);
+                if (EndlessFloorsPlugin.Instance.selectedFloor >= 16)
+                {
+                    EndlessFloorsPlugin.currentSave.Counters["slots"] = 5;
+                }
+                else if (EndlessFloorsPlugin.Instance.selectedFloor >= 12)
+                {
+                    EndlessFloorsPlugin.currentSave.Counters["slots"] = 4;
+                }
+                else if (EndlessFloorsPlugin.Instance.selectedFloor >= 9)
+                {
+                    EndlessFloorsPlugin.currentSave.Counters["slots"] = 3;
+                }
+                else if (EndlessFloorsPlugin.Instance.selectedFloor >= 6)
+                {
+                    EndlessFloorsPlugin.currentSave.Counters["slots"] = 2;
+                }
+                ElevatorScreen evl = SceneManager.GetActiveScene().GetRootGameObjects().Where(x => x.name == "ElevatorScreen").First().GetComponent<ElevatorScreen>();
+                gl.AssignElevatorScreen(evl);
+                evl.gameObject.SetActive(true);
+                gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
+                evl.Initialize();
+                evl.QueueShop();
+                gl.SetSave(false);
+            });
+
             modeText.localPosition -= new Vector3(0f,48f,0f);
         }
         void Update()

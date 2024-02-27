@@ -4,6 +4,7 @@
 {"key":"Upg_None","value":"This upgrade slot doesn't have an upgrade in it!\nYou better get learnin'!"},
 {"key":"Upg_ExtraLife","value":"Life Restore\nThis will restore all your lives for this floor!"},
 {"key":"Upg_ExtraLifeLast","value":"Life Restore<color=red>(Last one in stock!)</color>\nThis will restore all your lives for this floor!"},
+{"key":"Upg_BonusLife","value":"Life Cap Increase\nThis will increase your max lives count by one for the rest of the game!\n(Will not give you that life until the next floor unless your at max!)"},
 {"key":"Upg_Stamina","value":"Stamina Boost\nFor every one of these you have, you'll get +25 max stamina!\nYou only get the extra stamina when Baldi becomes active."},
 {"key":"Upg_AutoTag","value":"Auto Tag\nWhen Baldi is done counting, you will automatically have a Faculty Nametag applied to you!"},
 {"key":"Upg_AutoTag2","value":"Auto Tag+\nHave an automatically applied Faculty Nametag that lasts a whole minute!"},

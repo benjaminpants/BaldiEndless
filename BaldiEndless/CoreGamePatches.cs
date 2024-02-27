@@ -18,7 +18,7 @@ namespace BaldiEndless
     {
         static void Postfix(CoreGameManager __instance)
         {
-            __instance.GradeVal = 16; //less bonus YTPs until you truly DESERVE them!!
+            __instance.GradeVal = EndlessFloorsPlugin.currentSave.savedGrade; //less bonus YTPs until you truly DESERVE them!!
             //Singleton<BaseGameManager>.Instance.CompleteMapOnReady();
         }
 
@@ -89,7 +89,7 @@ namespace BaldiEndless
             bool isBaldi = npc.Character == Character.Baldi;
             if (Mathf.Abs(clampedCount - unclampedCount) >= 3)
             {
-                moveSpeed = Mathf.Min(1f + (((Mathf.Abs(clampedCount - unclampedCount)) - 2f) * (isBaldi ? 0.010f : 0.020f)), isBaldi ? 1.1f : 1.6f);
+                moveSpeed = Mathf.Min(1f + (((Mathf.Abs(clampedCount - unclampedCount)) - 2f) * (isBaldi ? 0.010f : 0.020f)), isBaldi ? 1.07f : 1.6f);
             }
             if (moveSpeed != 0f)
             {
@@ -99,7 +99,7 @@ namespace BaldiEndless
         }
     }
 
-    [HarmonyPatch(typeof(BaseGameManager))]
+    /*[HarmonyPatch(typeof(BaseGameManager))]
     [HarmonyPatch("Initialize")]
     class QuitOnBeyondMap
     {
@@ -118,7 +118,7 @@ namespace BaldiEndless
                 }
             }
         }
-    }
+    }*/
 
 
     [HarmonyPatch(typeof(BaseGameManager))]

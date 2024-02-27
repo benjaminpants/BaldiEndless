@@ -45,6 +45,7 @@ namespace BaldiEndless
         public override void OnPurchase()
         {
             Singleton<CoreGameManager>.Instance.SetLives((int)_defaultLives.GetValue(Singleton<BaseGameManager>.Instance));
+            Singleton<ElevatorScreen>.Instance.Invoke("UpdateLives", 0f);
             base.OnPurchase();
         }
         public override bool ShouldAppear(int currentLevel)
@@ -52,6 +53,26 @@ namespace BaldiEndless
             return base.ShouldAppear(currentLevel) && 
                 (Singleton<CoreGameManager>.Instance.Lives < (int)_defaultLives.GetValue(Singleton<BaseGameManager>.Instance)) &&
                 Singleton<CoreGameManager>.Instance.currentMode != EndlessFloorsPlugin.NNFloorMode;
+        }
+    }
+
+    class BonusLifeUpgrade : StandardUpgrade
+    {
+        static internal FieldInfo _defaultLives = AccessTools.Field(typeof(BaseGameManager), "defaultLives");
+        public override void OnPurchase()
+        {
+            if (Singleton<CoreGameManager>.Instance.Lives >= (int)_defaultLives.GetValue(Singleton<BaseGameManager>.Instance))
+            {
+                Singleton<CoreGameManager>.Instance.SetLives(2 + EndlessFloorsPlugin.currentSave.GetUpgradeCount("bonuslife"));
+            }
+            _defaultLives.SetValue(Singleton<BaseGameManager>.Instance, 2 + EndlessFloorsPlugin.currentSave.GetUpgradeCount("bonuslife"));
+            Singleton<ElevatorScreen>.Instance.Invoke("UpdateLives",0f);
+            base.OnPurchase();
+        }
+        public override bool ShouldAppear(int currentLevel)
+        {
+            return base.ShouldAppear(currentLevel) && Singleton<CoreGameManager>.Instance.currentMode != EndlessFloorsPlugin.NNFloorMode
+                && Singleton<CoreGameManager>.Instance.GetPoints(0) >= Mathf.RoundToInt(GetCost(currentLevel) * 0.75f);
         }
     }
 

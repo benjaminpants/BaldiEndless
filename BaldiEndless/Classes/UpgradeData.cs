@@ -28,7 +28,8 @@ namespace BaldiEndless
         public UpgradePurchaseBehavior behavior = UpgradePurchaseBehavior.FillUpgradeSlot;
 
         protected int ClampLvl(int level) => Mathf.Clamp(level, 0, levels.Length - 1);
-        public virtual Sprite GetIcon(int level) => EndlessFloorsPlugin.Instance.UpgradeIcons[levels[ClampLvl(level)].icon];
+        public virtual Sprite GetIcon(int level) => EndlessFloorsPlugin.Instance.UpgradeIcons[GetIconKey(level)];
+        public virtual string GetIconKey(int level) => levels[ClampLvl(level)].icon;
         public virtual int GetCost(int level) => levels[ClampLvl(level)].cost;
         public virtual string GetLoca(int level) => levels[ClampLvl(level)].descLoca;
         public virtual int CalculateSellPrice(int level) => GetCost(ClampLvl(level)) / 4;
