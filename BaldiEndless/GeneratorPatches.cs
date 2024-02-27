@@ -214,8 +214,8 @@ namespace BaldiEndless
             __instance.ld.maxFacultyRooms = currentFD.maxFacultyRoomCount;
             __instance.ld.minFacultyRooms = currentFD.minFacultyRoomCount;
 
-            __instance.ld.maxSpecialBuilders = Mathf.RoundToInt(currentFD.unclampedScaleVar / 11f);
-            __instance.ld.minSpecialBuilders = Mathf.RoundToInt((currentFD.unclampedScaleVar / 11f) / 1.5f);
+            __instance.ld.maxSpecialBuilders = Mathf.CeilToInt(currentFD.unclampedScaleVar / 11f);
+            __instance.ld.minSpecialBuilders = Mathf.CeilToInt((currentFD.unclampedScaleVar / 11f) / 1.5f);
 
             __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
             __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);

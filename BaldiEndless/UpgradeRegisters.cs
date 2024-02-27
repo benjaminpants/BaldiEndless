@@ -279,7 +279,7 @@ namespace BaldiEndless
             Register(new SlotUpgrade()
             {
                 id = "slots",
-                weight = 65,
+                weight = 75,
                 behavior=UpgradePurchaseBehavior.IncrementCounter,
                 levels = new UpgradeLevel[]
                 {
