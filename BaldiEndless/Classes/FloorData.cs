@@ -67,7 +67,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.RoundToInt((FloorID / 1.5f) - 1);
+                return Mathf.FloorToInt((FloorID / 1.6f) - 1);
             }
         }
         public int minPlots
@@ -82,7 +82,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.Max(Mathf.RoundToInt(maxSize / 20f),1);
+                return Mathf.Max(Mathf.RoundToInt(maxSize / 21f),1);
             }
         }
 
@@ -106,7 +106,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.FloorToInt(maxSize / 30f);
+                return Mathf.FloorToInt(maxSize / 28f);
             }
         }
 

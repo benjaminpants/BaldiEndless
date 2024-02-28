@@ -25,6 +25,20 @@ namespace BaldiEndless
 
     }
 
+    [HarmonyPatch(typeof(CoreGameManager))]
+    [HarmonyPatch("AddPoints")]
+    class PointsMultiplier
+    {
+        static double[] _multipliers = { 1, 1.25, 1.5, 2 };
+        static void Prefix(ref int points)
+        {
+            if (points < 0) return;
+            points = (int)Math.Ceiling(points * _multipliers[EndlessFloorsPlugin.currentSave.GetUpgradeCount("ytpsmult")]);
+        }
+
+
+    }
+
     [HarmonyPatch(typeof(BaseGameManager))]
     [HarmonyPatch("BeginSpoopMode")]
     class OnSpoopMode

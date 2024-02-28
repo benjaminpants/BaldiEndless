@@ -22,6 +22,20 @@ namespace BaldiEndless
         }
     }
 
+
+    [HarmonyPatch(typeof(FirstPrize_Active))]
+    [HarmonyPatch("UpdateMoveMods")]
+    class FirstPrizeFixPatch
+    {
+        static void Postfix(FirstPrize_Active __instance, MoveModsManager ___moveModsMan)
+        {
+            for (int i = 0; i < ___moveModsMan.Count; i++)
+            {
+                ___moveModsMan.moveMod(i).movementAddend *= __instance.Npc.GetComponent<Entity>().ExternalActivity.Multiplier;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(Bully))]
     [HarmonyPatch("StealItem")]
     class BullyStealPatch

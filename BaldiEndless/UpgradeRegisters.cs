@@ -93,7 +93,7 @@ namespace BaldiEndless
             Register(new ExitUpgrade()
             {
                 id = "freeexit",
-                weight = 45,
+                weight = 40,
                 levels = new UpgradeLevel[]
                 {
                     new UpgradeLevel()
@@ -270,7 +270,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="HungryBully",
-                        cost=500,
+                        cost=350,
                         descLoca="Upg_HungryBully"
                     }
                 }
@@ -433,7 +433,7 @@ namespace BaldiEndless
                     }
                 }
             });
-            // favoritism
+            // bonus life
             Register(new BonusLifeUpgrade()
             {
                 id = "bonuslife",
@@ -460,6 +460,33 @@ namespace BaldiEndless
                     }
                 },
                 behavior = UpgradePurchaseBehavior.IncrementCounter
+            });
+            // ytps upgrade
+            Register(new StandardUpgrade()
+            {
+                id = "ytpsmult",
+                weight = 60,
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="Multiply1",
+                        cost=444,
+                        descLoca="Upg_MultiplyYTP"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="Multiply2",
+                        cost=888,
+                        descLoca="Upg_MultiplyYTP"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="Multiply3",
+                        cost=999,
+                        descLoca="Upg_MultiplyYTP"
+                    }
+                }
             });
         }
     }
