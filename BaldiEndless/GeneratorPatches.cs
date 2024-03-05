@@ -113,14 +113,19 @@ namespace BaldiEndless
             __instance.ld.fieldTrip = ((currentFD.FloorID % 4 == 0) && currentFD.FloorID != 4) || currentFD.FloorID % 99 == 0;
             __instance.ld.fieldTrips = genData.fieldTrips.ToArray();
             int avgWeight = 0;
+            int heighestWeight = 0;
             for (int i = 0; i < genData.items.Count; i++)
             {
                 avgWeight += genData.items[i].weight;
+                if (genData.items[i].weight > heighestWeight)
+                {
+                    heighestWeight = genData.items[i].weight;
+                }
             }
             avgWeight /= genData.items.Count;
-            __instance.ld.fieldTripItems = genData.items.Where(x => x.weight > avgWeight).Select(x => new WeightedItem() { weight = x.weight, selection = x.selection}).ToList();
+            //avgWeight = Mathf.CeilToInt(Mathf.Clamp(avgWeight * 2f, heighestWeight / 2f, heighestWeight - 25));
+            __instance.ld.fieldTripItems = genData.items.Where(x => x.weight < avgWeight).Select(x => new WeightedItem() { weight = x.weight, selection = x.selection}).ToList();
             SceneObject floor2 = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2");
-            __instance.ld.fieldTripItems = floor2.levelObject.fieldTripItems; //TODO: DONT FUCKING DO THIS
             __instance.ld.tripEntrancePre = floor2.levelObject.tripEntrancePre;
             __instance.ld.tripEntranceRoom = floor2.levelObject.tripEntranceRoom;
 
@@ -160,7 +165,7 @@ namespace BaldiEndless
             float rgb = Mathf.Max(16f, 255f - (currentFD.FloorID * 5));
             __instance.ld.standardDarkLevel = new Color(rgb / 255, rgb / 255, rgb / 255);
             __instance.ld.standardLightStrength = Mathf.Max(Mathf.RoundToInt(4f / (currentFD.FloorID / 24f)), 3);
-            __instance.ld.maxLightDistance = stableRng.Next(2, Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID / 2), 2, 12));
+            __instance.ld.maxLightDistance = rng.Next(2, Mathf.Clamp(Mathf.FloorToInt(currentFD.FloorID / 2), 2, 12));
 
             // npc logic
             __instance.ld.potentialNPCs = new List<WeightedNPC>();
@@ -234,6 +239,8 @@ namespace BaldiEndless
             __instance.ld.minEventGap = currentFD.classRoomCount >= 14 ? 30f : 60f;
             __instance.ld.maxOffices = Mathf.Max(currentFD.maxOffices, 1);
             __instance.ld.minOffices = 1;
+
+            //__instance.ld.deadEndBuffer
 
             Baldi myBladi = (Baldi)MTM101BaldiDevAPI.npcMetadata.Get(Character.Baldi).prefabs["Baldi_Main" + currentFD.myFloorBaldi];
 

@@ -488,6 +488,33 @@ namespace BaldiEndless
                     }
                 }
             });
+            // speedy boots
+            Register(new StandardUpgrade()
+            {
+                id = "speedyboots",
+                weight = 80,
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="SpeedyBoots",
+                        cost=450,
+                        descLoca="Upg_SpeedyBoots"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="SpeedyBoots2",
+                        cost=899,
+                        descLoca="Upg_SpeedyBoots2"
+                    },
+                    /*new UpgradeLevel() // why so expensive? because this is fucking overpowered.
+                    {
+                        icon="SpeedyBoots3",
+                        cost=2500,
+                        descLoca="Upg_SpeedyBoots3"
+                    }*/
+                }
+            });
         }
     }
 }

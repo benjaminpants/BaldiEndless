@@ -48,7 +48,7 @@ namespace BaldiEndless
             List<int> toSteal = (List<int>)slotsToSteal.GetValue(instance);
             for (int i = 0; i < toSteal.Count; i++)
             {
-                if (pm.itm.items[toSteal[i]].itemType == Items.ZestyBar)
+                if (pm.itm.items[toSteal[i]].itemType == Items.Quarter)
                 {
                     slotsToSteal.SetValue(instance, new List<int>()
                     {
@@ -70,7 +70,7 @@ namespace BaldiEndless
             }
             for (int i = 0; i < toSteal.Count; i++)
             {
-                if (pm.itm.items[toSteal[i]].itemType == Items.Apple)
+                if (pm.itm.items[toSteal[i]].GetMeta().tags.Contains("food"))
                 {
                     slotsToSteal.SetValue(instance, new List<int>()
                     {
@@ -81,7 +81,7 @@ namespace BaldiEndless
             }
             for (int i = 0; i < toSteal.Count; i++)
             {
-                if (pm.itm.items[toSteal[i]].GetMeta().tags.Contains("food"))
+                if (pm.itm.items[toSteal[i]].itemType == Items.Apple)
                 {
                     slotsToSteal.SetValue(instance, new List<int>()
                     {

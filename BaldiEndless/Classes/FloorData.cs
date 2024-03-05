@@ -35,7 +35,8 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.Min(FloorID, 42 + CapIncrease) * (Mathf.Min(FloorID, 42 + CapIncrease) / 8f);
+                int mainV = Mathf.Min(FloorID, 42 + CapIncrease);
+                return mainV * (mainV / 8f);
             }
         }
 

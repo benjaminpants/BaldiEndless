@@ -99,6 +99,64 @@ namespace BaldiEndless
         }
     }
 
+    [HarmonyPatch(typeof(ITM_Boots))]
+    [HarmonyPatch("Use")]
+    class BootsPatch
+    {
+        static void Postfix(ITM_Boots __instance, PlayerManager pm, float ___setTime)
+        {
+            if (EndlessFloorsPlugin.currentSave.HasUpgrade("speedyboots"))
+            {
+                __instance.StartCoroutine(BootsNumerator(pm, ___setTime));
+            }
+        }
+
+        static IEnumerator BootsNumerator(PlayerManager pm, float startTime)
+        {
+            float time = startTime;
+            BootsSpeedManager myChecker = pm.gameObject.GetComponent<BootsSpeedManager>();
+            if (myChecker == null)
+            {
+                myChecker = pm.gameObject.AddComponent<BootsSpeedManager>();
+            }
+            myChecker.AddBoot();
+            while (time > 0f)
+            {
+                time -= Time.deltaTime * pm.PlayerTimeScale;
+                yield return null;
+            }
+            myChecker.RemoveBoot();
+            yield break;
+        }
+
+        class BootsSpeedManager : MonoBehaviour
+        {
+            private int bootsActive = 0;
+            MovementModifier speedMod = new MovementModifier(Vector3.zero, 1f + Mathf.Min(0.5f, EndlessFloorsPlugin.currentSave.GetUpgradeCount("speedyboots") * 0.25f));
+
+            void Start()
+            {
+                this.GetComponent<Entity>().ExternalActivity.moveMods.Add(speedMod);
+            }
+
+            public void AddBoot()
+            {
+                bootsActive++;
+            }
+
+            public void RemoveBoot()
+            {
+                bootsActive--;
+                if (bootsActive <= 0)
+                {
+                    this.GetComponent<Entity>().ExternalActivity.moveMods.Remove(speedMod);
+                    Destroy(this);
+                }
+            }
+        }
+    }
+
+
     [HarmonyPatch(typeof(ITM_PrincipalWhistle))]
     [HarmonyPatch("Use")]
     class WhistlePatch
@@ -110,7 +168,7 @@ namespace BaldiEndless
             List<NPC> elligableNPCs = new List<NPC>();
             foreach (NPC npc in pm.ec.Npcs)
             {
-                if (Vector3.Distance(npc.transform.position,pm.transform.position) <= pm.pc.reach * 2)
+                if (Vector3.Distance(npc.transform.position,pm.transform.position) <= pm.pc.reach * 5)
                 {
                     if (!elligableNPCs.Contains(npc))
                     {
@@ -120,7 +178,7 @@ namespace BaldiEndless
             }
             RaycastHit hit;
             LayerMask clickMask = new LayerMask() {value=131073}; //copied from ITM_Scissors
-            if (Physics.Raycast(pm.transform.position, Singleton<CoreGameManager>.Instance.GetCamera(pm.playerNumber).transform.forward, out hit, pm.pc.reach*4, clickMask))
+            if (Physics.Raycast(pm.transform.position, Singleton<CoreGameManager>.Instance.GetCamera(pm.playerNumber).transform.forward, out hit, pm.pc.reach*7, clickMask))
             {
                 NPC hitNPC = hit.transform.GetComponent<NPC>();
                 if (hitNPC)

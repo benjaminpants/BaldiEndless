@@ -275,7 +275,7 @@ namespace BaldiEndless
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.Apple).value,
-                    weight = 1
+                    weight = 10
                 },
                 new WeightedItemObject()
                 {
