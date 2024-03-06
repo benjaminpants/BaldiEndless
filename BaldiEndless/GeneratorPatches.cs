@@ -271,6 +271,14 @@ namespace BaldiEndless
             __instance.ld.potentialPrePlotSpecialHalls = genData.hallInsertions.ToArray();
             __instance.ld.prePlotSpecialHallChance = 0.5f;
 
+            // halls stuff
+            __instance.ld.maxHallsToRemove = currentFD.FloorID / 2;
+            __instance.ld.minHallsToRemove = Mathf.Max(__instance.ld.maxHallsToRemove - 3, 0);
+
+            __instance.ld.facultyStickToHallChance = currentFD.facultyStickToHall;
+
+            __instance.ld.specialRoomsStickToEdge = currentFD.FloorID < 15;
+
         }
     }
 }

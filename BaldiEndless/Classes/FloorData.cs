@@ -48,6 +48,14 @@ namespace BaldiEndless
             }
         }
 
+        public float facultyStickToHall
+        {
+            get
+            {
+                return Mathf.Clamp(unclampedScaleVar / 16f, 0.05f, 0.95f);
+            }
+        }
+
         public int classRoomCount
         {
             get
