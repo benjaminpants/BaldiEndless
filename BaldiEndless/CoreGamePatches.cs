@@ -113,24 +113,17 @@ namespace BaldiEndless
         }
     }
 
-    /*[HarmonyPatch(typeof(BaseGameManager))]
+    /*
+    [HarmonyPatch(typeof(BaseGameManager))]
     [HarmonyPatch("Initialize")]
     class QuitOnBeyondMap
     {
         static void Postfix(BaseGameManager __instance)
         {
-            //__instance.Ec.map.CompleteMap();
+            __instance.Ec.map.CompleteMap();
             //__instance.Ec.Players[0].plm.staminaMax += EndlessFloorsPlugin.currentSave.staminasBought * 100;
             //__instance.Ec.Players[0].plm.stamina = __instance.Ec.Players[0].plm.staminaMax;
             //__instance.Ec.Players[0].itm.AddItem(EndlessFloorsPlugin.ItemObjects.Find(x => x.itemType == Items.GrapplingHook));
-            if ((Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode) || (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free))
-            {
-                if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
-                {
-                    UnityEngine.Object.Destroy(Singleton<ElevatorScreen>.Instance.gameObject);
-                    Singleton<CoreGameManager>.Instance.Quit();
-                }
-            }
         }
     }*/
 

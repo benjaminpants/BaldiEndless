@@ -20,7 +20,7 @@ namespace BaldiEndless
 {
 
     [BepInDependency("mtm101.rulerp.bbplus.baldidevapi")]
-    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "2.2.0.0")]
+    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "2.3.0.0")]
     public class EndlessFloorsPlugin : BaseUnityPlugin
     {
         public AssetManager assetManager = new AssetManager();

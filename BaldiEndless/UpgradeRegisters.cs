@@ -279,7 +279,7 @@ namespace BaldiEndless
             Register(new SlotUpgrade()
             {
                 id = "slots",
-                weight = 75,
+                weight = 92,
                 behavior=UpgradePurchaseBehavior.IncrementCounter,
                 levels = new UpgradeLevel[]
                 {
@@ -498,13 +498,13 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="SpeedyBoots",
-                        cost=450,
+                        cost=600,
                         descLoca="Upg_SpeedyBoots"
                     },
                     new UpgradeLevel()
                     {
                         icon="SpeedyBoots2",
-                        cost=899,
+                        cost=900,
                         descLoca="Upg_SpeedyBoots2"
                     },
                     /*new UpgradeLevel() // why so expensive? because this is fucking overpowered.

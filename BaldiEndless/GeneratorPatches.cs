@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MTM101BaldAPI;
+using MTM101BaldAPI.Registers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -272,12 +273,14 @@ namespace BaldiEndless
             __instance.ld.prePlotSpecialHallChance = 0.5f;
 
             // halls stuff
-            __instance.ld.maxHallsToRemove = currentFD.FloorID / 2;
+            __instance.ld.maxHallsToRemove = Mathf.Min(currentFD.FloorID / 2, 6);
             __instance.ld.minHallsToRemove = Mathf.Max(__instance.ld.maxHallsToRemove - 3, 0);
 
             __instance.ld.facultyStickToHallChance = currentFD.facultyStickToHall;
 
             __instance.ld.specialRoomsStickToEdge = currentFD.FloorID < 15;
+
+            GeneratorManagement.Invoke("INF", currentFD.FloorID, __instance.ld);
 
         }
     }

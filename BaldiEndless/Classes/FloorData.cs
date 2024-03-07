@@ -68,7 +68,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Math.Max(classRoomCount,4);
+                return Mathf.Clamp(classRoomCount / 2, 3, 8);
             }
         }
 
@@ -91,7 +91,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.Max(Mathf.RoundToInt(maxSize / 21f),1);
+                return Mathf.Max(Mathf.FloorToInt(maxSize / 20f), minSize >= 26 ? 1 : 0);
             }
         }
 
@@ -139,7 +139,8 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.CeilToInt((maxSize * 1.2f) - 24f);
+                float subCount = Mathf.Clamp(FloorID, 12f, 24f);
+                return Mathf.CeilToInt((maxSize * 1.2f) - subCount);
             }
         }
 
@@ -163,7 +164,8 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.CeilToInt((scaleVar / 7f) + 24f);
+                float addend = Mathf.Clamp(FloorID * 2f, 16f, 24f);
+                return Mathf.CeilToInt((scaleVar / 7f) + addend);
             }
         }
 
