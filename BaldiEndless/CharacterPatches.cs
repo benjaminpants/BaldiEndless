@@ -57,7 +57,7 @@ namespace BaldiEndless
                     return;
                 }
             }
-            for (int i = 0; i < toSteal.Count; i++)
+            /*for (int i = 0; i < toSteal.Count; i++)
             {
                 if (pm.itm.items[toSteal[i]].itemType == Items.Bsoda)
                 {
@@ -89,7 +89,7 @@ namespace BaldiEndless
                     });
                     return;
                 }
-            }
+            }*/
         }
 
         static MethodInfo checkF = AccessTools.Method(typeof(BullyStealPatch), "CheckForHungry");

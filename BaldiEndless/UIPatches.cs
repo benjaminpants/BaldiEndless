@@ -30,17 +30,16 @@ namespace BaldiEndless
 
         void Start()
         {
-            // TODO: FIX FREERUN! CURRENTLY BROKEN! VERY BAD!
             GameObject.Destroy(gameObject.transform.Find("Endless").gameObject);
             GameObject.Destroy(gameObject.transform.Find("Challenge").gameObject);
             GameObject.Destroy(gameObject.transform.Find("FieldTrips").gameObject);
             GameObject.Destroy(gameObject.transform.Find("Endless").gameObject);
-            GameObject.Destroy(gameObject.transform.Find("MainContinue").gameObject);
             Transform theFree = gameObject.transform.Find("Free");
             Transform theMain = gameObject.transform.Find("MainNew");
             theMain.gameObject.SetActive(true);
             Transform modeText = gameObject.transform.Find("ModeText");
-            //Transform seedInput = gameObject.transform.Find("SeedInput");
+            Transform seedInput = gameObject.transform.Find("SeedInput");
+            seedInput.gameObject.SetActive(true);
             theFree.localPosition = new Vector3(0f, theFree.localPosition.y - 48f, theFree.localPosition.z);
             theMain.localPosition -= new Vector3(0f, 48f,0f);
             StandardMenuButton clone = GameObject.Instantiate(theFree.gameObject).GetComponent<StandardMenuButton>();
@@ -262,6 +261,8 @@ namespace BaldiEndless
             {
                 __instance.gameObject.AddComponent<EndlessTitleUI>();
             }
+            __instance.mainNew.SetActive(true);
+            __instance.mainContinue.SetActive(false);
         }
     }
 

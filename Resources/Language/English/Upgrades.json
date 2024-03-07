@@ -8,7 +8,7 @@
 {"key":"Upg_Stamina","value":"Stamina Boost\nFor every one of these you have, you'll get +25 max stamina!\nYou only get the extra stamina when Baldi becomes active."},
 {"key":"Upg_AutoTag","value":"Auto Tag\nWhen Baldi is done counting, you will automatically have a Faculty Nametag applied to you!"},
 {"key":"Upg_AutoTag2","value":"Auto Tag+\nHave an automatically applied Faculty Nametag that lasts a whole minute!"},
-{"key":"Upg_HungryBully","value":"Greedy Bully\nThis'll make Bully prefer to steal Quarters from you!\nIf you have none, he'll take your BSODAs.\nIf you have none of those, he'll take your Apples!"},
+{"key":"Upg_HungryBully","value":"Greedy Bully\nThis'll make Bully prefer to steal Quarters over other items, so keep some change on you!"},
 {"key":"Upg_PompIncrease","value":"Mrs. Pomp Timer Increase\nThis'll increase the time Mrs Pomp gives you to head to her class!"},
 {"key":"Upg_GrappleBreak","value":"Grapple Upgrade\nThis'll allow grappling hooks to break through windows!"},
 {"key":"Upg_GrappleBreakDoor","value":"Grapple Upgrade\nThis'll allow grappling hooks to break through any lock!"},
