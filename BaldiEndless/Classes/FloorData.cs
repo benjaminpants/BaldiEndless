@@ -139,8 +139,8 @@ namespace BaldiEndless
         {
             get
             {
-                float subCount = Mathf.Clamp(FloorID, 12f, 24f);
-                return Mathf.CeilToInt((maxSize * 1.2f) - subCount);
+                float subCount = Mathf.Clamp(32 - FloorID, 24f, 32f);
+                return Mathf.Max(Mathf.CeilToInt((maxSize * 1.2f) - subCount), 3);
             }
         }
 
