@@ -15,6 +15,7 @@ using System.Collections;
 using System.Xml.Linq;
 using MTM101BaldAPI.Registers;
 using MTM101BaldAPI.Reflection;
+using MTM101BaldAPI.ObjectCreation;
 
 namespace BaldiEndless
 {
@@ -154,72 +155,27 @@ namespace BaldiEndless
             }
         }
 
-        // Ripped From Fade
-        static Texture2D FlipX(Texture2D texture)
-        {
-            Texture2D flipped = new Texture2D(texture.width, texture.height);
-
-            int width = texture.width;
-            int height = texture.height;
-
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    flipped.SetPixel(width - i - 1, j, texture.GetPixel(i, j));
-                }
-            }
-            flipped.Apply();
-
-            return flipped;
-        }
-
-        static Texture2D FlipY(Texture2D texture)
-        {
-            Texture2D flipped = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
-
-            int width = texture.width;
-            int height = texture.height;
-
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    flipped.SetPixel(i, height - j - 1, texture.GetPixel(i, j));
-                }
-            }
-            flipped.Apply();
-
-            return flipped;
-        }
-
-        static Cubemap CubemapFromTexture2D(Texture2D texture)
-        {
-            texture = FlipX(texture);
-            texture = FlipY(texture);
-
-            int cubemapWidth = texture.width / 6;
-            Cubemap cubemap = new Cubemap(cubemapWidth, TextureFormat.ARGB32, false);
-            cubemap.SetPixels(texture.GetPixels(0 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.NegativeZ);
-            cubemap.SetPixels(texture.GetPixels(1 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.PositiveZ);
-            cubemap.SetPixels(texture.GetPixels(2 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.NegativeY);
-            cubemap.SetPixels(texture.GetPixels(3 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.PositiveY);
-            cubemap.SetPixels(texture.GetPixels(4 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.NegativeX);
-            cubemap.SetPixels(texture.GetPixels(5 * cubemapWidth, 0, cubemapWidth, cubemapWidth), CubemapFace.PositiveX);
-            cubemap.Apply();
-            return cubemap;
-        }
-
         // once all resources have been loaded
         void OnResourcesLoaded()
         {
+            Texture2D presentTex = AssetLoader.TextureFromMod(this, "PresentIcon_Large.png");
+            Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
+            presentObject = new ItemBuilder(Info)
+                .SetNameAndDescription("Itm_Present", "Itm_Present")
+                .SetSprites(presentSprite, presentSprite)
+                .SetAsInstantUse()
+                .SetItemComponent<ITM_Present>()
+                .SetGeneratorCost(26)
+                .SetShopPrice(int.MaxValue)
+                .SetEnum(presentEnum)
+                .Build();
             assetManager.AddRange<HappyBaldi>(Resources.FindObjectsOfTypeAll<HappyBaldi>(), (bald) =>
             {
                 if (bald.name == "HappyBaldi") return "HappyBaldi1";
                 return bald.name;
             }); //we need the happy baldis
             assetManager.AddRange<Cubemap>(Resources.FindObjectsOfTypeAll<Cubemap>().Where(x => (x.name == "Cubemap_DayStandard" || x.name == "Cubemap_Twilight")).ToArray());
-            Cubemap darkCubemap = CubemapFromTexture2D(AssetLoader.TextureFromMod(this, "DarkSky_OneImage.png"));
+            Cubemap darkCubemap = AssetLoader.CubemapFromTexture(AssetLoader.TextureFromMod(this, "DarkSky_OneImage.png"));
             /*Cubemap templateMap = (Cubemap)assetManager[typeof(Cubemap), "Cubemap_Default"];
             Cubemap newCubemap = new Cubemap(256, templateMap.format, false);
             newCubemap.filterMode = FilterMode.Point;
@@ -233,6 +189,8 @@ namespace BaldiEndless
             newCubemap.name = "Cubemap_DarkSky";
             newCubemap.Apply();*/
             darkCubemap.name = "Cubemap_DarkSky";
+            SkyboxMetaStorage.Instance.Add(new SkyboxMetadata(Info, darkCubemap, new Color(46f / 255f, 52f / 255f, 68f / 255f)));
+            SkyboxMetaStorage.Instance.Find(x => x.value.name == "Cubemap_Twilight").lightColor = new Color(239f / 255f, 188f / 255f, 162f / 255f);
             assetManager.Add<Cubemap>("Cubemap_DarkSky", darkCubemap);
             SceneObjects = Resources.FindObjectsOfTypeAll<SceneObject>();
             currentSceneObject = SceneObjects.Where(x => x.levelTitle == "F3").First();
@@ -253,13 +211,8 @@ namespace BaldiEndless
             allNotebooks.subtitle = false;
             allNotebooks.soundClip = AssetLoader.AudioClipFromMod(this, "BAL_Notebooks.wav");
             allNotebooks.MarkAsNeverUnload();
-            // make outside area lighting change based on skybox
-            RoomFunctionContainer container = MTM101BaldiDevAPI.roomAssetMeta.Get(RoomCategory.Special, "Room_Playground_1").value.roomFunctionContainer;
-            List<RoomFunction> funcs = (List<RoomFunction>)container.ReflectionGetVariable("functions");
-            funcs.Remove(container.GetComponent<SunlightRoomFunction>());
-            UnityEngine.Object.Destroy(container.GetComponent<SunlightRoomFunction>());
-            container.AddFunction(container.gameObject.AddComponent<CustomTimeLightFunction>());
             ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
+            // TODO: make this not hard coded anymore.
             ITM_Present.potentialObjects.AddRange(new WeightedItemObject[]
             {
                 new WeightedItemObject()
@@ -602,12 +555,12 @@ namespace BaldiEndless
                 new WeightedItemObject() 
                 {
                     selection = items.FindByEnum(Items.Quarter).value,
-                    weight = 60
+                    weight = 100
                 },
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.AlarmClock).value,
-                    weight = 56
+                    weight = 76
                 },
                 new WeightedItemObject()
                 {
@@ -617,89 +570,154 @@ namespace BaldiEndless
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.Boots).value,
-                    weight = 55
+                    weight = 75
                 },
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.ChalkEraser).value,
-                    weight = 80
+                    weight = 100
                 },
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.DetentionKey).value,
-                    weight = 40
-                },
-                new WeightedItemObject()
-                {
-                    selection = items.FindByEnum(Items.GrapplingHook).value,
-                    weight = 25
-                },
-                new WeightedItemObject()
-                {
-                    selection = items.FindByEnum(Items.Nametag).value,
-                    weight = 45
-                },
-                new WeightedItemObject()
-                {
-                    selection = items.FindByEnum(Items.Wd40).value,
                     weight = 60
                 },
                 new WeightedItemObject()
                 {
-                    selection = items.FindByEnum(Items.PortalPoster).value,
-                    weight = 20
+                    selection = items.FindByEnum(Items.GrapplingHook).value,
+                    weight = 45
                 },
                 new WeightedItemObject()
                 {
-                    selection = items.FindByEnum(Items.PrincipalWhistle).value,
-                    weight = 50
+                    selection = items.FindByEnum(Items.Nametag).value,
+                    weight = 65
                 },
                 new WeightedItemObject()
                 {
-                    selection = items.FindByEnum(Items.Scissors).value,
+                    selection = items.FindByEnum(Items.Wd40).value,
                     weight = 80
                 },
                 new WeightedItemObject()
                 {
-                    selection = items.FindByEnum(Items.DoorLock).value,
-                    weight = 42
-                },
-                new WeightedItemObject()
-                {
-                    selection = items.FindByEnum(Items.Tape).value,
+                    selection = items.FindByEnum(Items.PortalPoster).value,
                     weight = 40
                 },
                 new WeightedItemObject()
                 {
-                    selection = items.FindByEnum(Items.Teleporter).value,
-                    weight = 25
-                },
-                new WeightedItemObject()
-                {
-                    selection = items.FindByEnum(Items.ZestyBar).value,
+                    selection = items.FindByEnum(Items.PrincipalWhistle).value,
                     weight = 70
                 },
                 new WeightedItemObject()
                 {
+                    selection = items.FindByEnum(Items.Scissors).value,
+                    weight = 100
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.DoorLock).value,
+                    weight = 62
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Tape).value,
+                    weight = 60
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Teleporter).value,
+                    weight = 45
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.ZestyBar).value,
+                    weight = 90
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Bsoda).value,
+                    weight = 40
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.NanaPeel).value,
+                    weight = 85
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Points).value, //add 100 point items
+                    weight = 5
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Points).itemObjects[1], //add 50 point item
+                    weight = 10
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.Points).itemObjects[0], //add 25 point items
+                    weight = 15
+                },
+                new WeightedItemObject()
+                {
                     selection = EndlessFloorsPlugin.presentObject,
-                    weight = 74
+                    weight = 80
                 }
             });
             genData.specialRoomAssets.AddRange(new WeightedRoomAsset[] { 
                 new WeightedRoomAsset()
                 {
-                    weight = 200,
-                    selection = rooms.Get(RoomCategory.Special, "Room_Cafeteria1").value
+                    weight = 190,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Cafeteria_1").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 190,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Cafeteria_2").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 190,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Cafeteria_3").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 115,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Cafeteria_Hard_1").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 115,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Cafeteria_Hard_2").value
                 },
                 new WeightedRoomAsset()
                 {
                     weight = 200,
-                    selection = rooms.Get(RoomCategory.Special, "Room_Library1").value
+                    selection = rooms.Get(RoomCategory.Special, "Room_Library_1").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 200,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Library_2").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 200,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Library_3").value
                 },
                 new WeightedRoomAsset()
                 {
                     weight = 200,
                     selection = rooms.Get(RoomCategory.Special, "Room_Playground_1").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 200,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Playground_2").value
+                },
+                new WeightedRoomAsset()
+                {
+                    weight = 200,
+                    selection = rooms.Get(RoomCategory.Special, "Room_Playground_3").value
                 }
             });
             genData.officeRoomAssets.AddRange(new WeightedRoomAsset[] {
@@ -788,17 +806,9 @@ namespace BaldiEndless
             AddWeightedTextures(ref profFloorTextures, "ProfFloors");
 
             assetManager.Add("UpgradeSlot5", AssetLoader.TextureFromMod(this, "UpgradeSlot5.png"));
-            assetManager.Add("OutOfOrderSlot", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "MissingSlot.png")));
+            assetManager.Add("OutOfOrderSlot", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "MissingSlot.png"), 1f));
             assetManager.Add("TimeSlow", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeSlow.wav"), "Sfx_TimeSlow", SoundType.Effect, Color.blue));
             assetManager.Add("TimeFast", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeFastFast.wav"), "Sfx_TimeFast", SoundType.Effect, Color.blue));
-
-            Texture2D presentTex = AssetLoader.TextureFromMod(this, "PresentIcon_Large.png");
-            Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
-            presentObject = ObjectCreators.CreateItemObject("Itm_Present", "Itm_Present", presentSprite, presentSprite, presentEnum, 9999, 26);
-            DontDestroyOnLoad(presentObject.item = new GameObject().AddComponent<ITM_Present>()); // WHAT THE FUCK THIS IS ACTUALLY VALID SYNTAX I WAS FUCKING JOKING
-            ItemMetaData meta = new ItemMetaData(this.Info, presentObject);
-            meta.flags = ItemFlags.NoInventory | ItemFlags.NoUses;
-            presentObject.AddMeta(meta);
             ModdedSaveSystem.AddSaveLoadAction(this, SaveLoadHighestFloor);
             StartCoroutine(WaitTilAllLoaded(harmony));
 
@@ -837,9 +847,9 @@ namespace BaldiEndless
             });
             EndlessUpgradeRegisters.RegisterDefaults();
             MTM101BaldAPI.SaveSystem.ModdedSaveGame.AddSaveHandler(new EndlessFloorsSaveHandler());
-            MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(OnResourcesLoaded, true);
+            MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(Info, OnResourcesLoaded, true);
 
-            assetManager.AddRange<Sprite>(new Sprite[] { AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes4.png")), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes5.png")), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes6.png")) }, new string[] { "LifeTubes4", "LifeTubes5", "LifeTubes6"});
+            assetManager.AddRange<Sprite>(new Sprite[] { AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes4.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes5.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes6.png"), 1f) }, new string[] { "LifeTubes4", "LifeTubes5", "LifeTubes6"});
 
         }
 

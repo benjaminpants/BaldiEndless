@@ -132,7 +132,7 @@ namespace BaldiEndless
         class BootsSpeedManager : MonoBehaviour
         {
             private int bootsActive = 0;
-            MovementModifier speedMod = new MovementModifier(Vector3.zero, 1f + Mathf.Min(0.5f, EndlessFloorsPlugin.currentSave.GetUpgradeCount("speedyboots") * 0.25f));
+            MovementModifier speedMod = new MovementModifier(Vector3.zero, 1f + EndlessFloorsPlugin.currentSave.GetUpgradeCount("speedyboots") * 0.15f);
 
             void Start()
             {
@@ -196,41 +196,6 @@ namespace BaldiEndless
                 if (!x.GetMeta().flags.HasFlag(NPCFlags.HasTrigger)) return;
                 _setGuilt.Invoke(x, new object[] { 10f, "Bullying" });
             });
-        }
-    }
-
-    [HarmonyPatch(typeof(ItemManager))]
-    [HarmonyPatch("AddItem")]
-    [HarmonyPatch(new Type[] { typeof(ItemObject), typeof(Pickup) })]
-    class AddItemPatch
-    {
-        static float[] LuckValues => new float[] { 1f, 1.45f, 2f, 2.37f, 3f, 4f };
-
-        static void Prefix(ItemManager __instance, ref ItemObject item)
-        {
-            if (item.itemType == EndlessFloorsPlugin.presentEnum)
-            {
-                WeightedItemObject[] objects = ITM_Present.potentialObjects.ToArray();
-                int weightAverage = objects.Sum(x => x.weight) / objects.Length;
-                Dictionary<WeightedItemObject, int> ogWeights = new Dictionary<WeightedItemObject, int>();
-                objects.Do((WeightedItemObject obj) =>
-                {
-                    ogWeights.Add(obj, obj.weight);
-                    if (obj.weight > weightAverage)
-                    {
-                        obj.weight = Mathf.FloorToInt(obj.weight / LuckValues[EndlessFloorsPlugin.currentSave.GetUpgradeCount("luck")]);
-                    }
-                    else
-                    {
-                        obj.weight = Mathf.CeilToInt(obj.weight * LuckValues[EndlessFloorsPlugin.currentSave.GetUpgradeCount("luck")]);
-                    }
-                });
-                item = WeightedItemObject.RandomSelection(objects);
-                objects.Do((WeightedItemObject obj) =>
-                {
-                    obj.weight = ogWeights[obj];
-                });
-            }
         }
     }
 }

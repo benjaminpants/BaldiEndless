@@ -25,7 +25,7 @@ namespace BaldiEndless
 
     }
 
-    [HarmonyPatch(typeof(CoreGameManager))]
+    /*[HarmonyPatch(typeof(CoreGameManager))]
     [HarmonyPatch("AddPoints")]
     class PointsMultiplier
     {
@@ -37,7 +37,7 @@ namespace BaldiEndless
         }
 
 
-    }
+    }*/
 
     [HarmonyPatch(typeof(BaseGameManager))]
     [HarmonyPatch("BeginSpoopMode")]

@@ -29,9 +29,9 @@
 {"key":"Upg_FieldtripRedo","value":"Field Trip Redo\nAllows you to redo a field trip the next time you die,\nor as soon as you buy this upgrade if you've already done a field trip!"},
 {"key":"Upg_Luck","value":"Birthday Luck\nIncreases the likelyhood of getting rare items from a Present!"},
 {"key":"Upg_Error","value":"????\nSomethings gone wrong here... You shouldn't be seeing this..."},
-{"key":"Upg_SpeedyBoots","value":"Quick Feet\nWhile wearing the Big Ol' Boots, you get a 1.25x speedboost!"},
-{"key":"Upg_SpeedyBoots2","value":"Quick Feet\nWhile wearing the Big Ol' Boots, you get a 1.5x speedboost!"},
-{"key":"Upg_SpeedyBoots3","value":"Quick Feet\nWhile wearing the Big Ol' Boots, you get a 1.5x <color=red>stackable</color> speedboost!"},
+{"key":"Upg_SpeedyBoots","value":"Quick Feet\nWhile wearing the Big Ol' Boots, you get a 1.1x speedboost!"},
+{"key":"Upg_SpeedyBoots2","value":"Quick Feet\nWhile wearing the Big Ol' Boots, you get a 1.2x speedboost!"},
+{"key":"Upg_SpeedyBoots3","value":"Quick Feet\nWhile wearing the Big Ol' Boots, you get a 1.2x <color=red>stackable</color> speedboost!"},
 {"key":"Desc_Store","value":"Welcome to Johnny's Store!\nJust click on upgrades you want to buy.\nOr, click on an upgrade you already have to sell it! It's that easy!"}
 
 ]}

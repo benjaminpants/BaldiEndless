@@ -22,31 +22,31 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon = "Luck1",
-                        cost = 600,
+                        cost = 1000,
                         descLoca = "Upg_Luck"
                     },
                     new UpgradeLevel()
                     {
                         icon = "Luck2",
-                        cost = 675,
+                        cost = 1750,
                         descLoca = "Upg_Luck"
                     },
                     new UpgradeLevel()
                     {
                         icon = "Luck3",
-                        cost = 900,
+                        cost = 2000,
                         descLoca = "Upg_Luck"
                     },
                     new UpgradeLevel()
                     {
                         icon = "Luck4",
-                        cost = 1275,
+                        cost = 3500,
                         descLoca = "Upg_Luck"
                     },
                     new UpgradeLevel()
                     {
                         icon = "Luck5",
-                        cost = 1800,
+                        cost = 6000,
                         descLoca = "Upg_Luck"
                     }
                 },
@@ -61,7 +61,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="Reroll",
-                        cost=125,
+                        cost=500,
                         descLoca="Upg_Reroll"
                     }
                 },
@@ -78,13 +78,13 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="AutoTag",
-                        cost=325,
+                        cost=800,
                         descLoca="Upg_AutoTag"
                     },
                     new UpgradeLevel()
                     {
                         icon="AutoTag2",
-                        cost=650,
+                        cost=1250,
                         descLoca="Upg_AutoTag2"
                     }
                 }
@@ -99,13 +99,13 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="FreeExit",
-                        cost=650,
+                        cost=2000,
                         descLoca="Upg_FreeExit"
                     },
                     new UpgradeLevel()
                     {
                         icon="FreeExit2",
-                        cost=1350,
+                        cost=2500,
                         descLoca="Upg_FreeExit2"
                     }
                 }
@@ -120,37 +120,37 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="Bank1",
-                        cost=400,
+                        cost=1000,
                         descLoca="Upg_Bank"
                     },
                     new UpgradeLevel()
                     {
                         icon="Bank2",
-                        cost=100,
-                        descLoca="Upg_Bank"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="Bank3",
-                        cost=400,
-                        descLoca="Upg_Bank"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="Bank5",
                         cost=500,
                         descLoca="Upg_Bank"
                     },
                     new UpgradeLevel()
                     {
+                        icon="Bank3",
+                        cost=1000,
+                        descLoca="Upg_Bank"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="Bank5",
+                        cost=1500,
+                        descLoca="Upg_Bank"
+                    },
+                    new UpgradeLevel()
+                    {
                         icon="Bank6",
-                        cost=700,
+                        cost=1500,
                         descLoca="Upg_Bank"
                     },
                     new UpgradeLevel()
                     {
                         icon="Bank10",
-                        cost=999,
+                        cost=5000,
                         descLoca="Upg_Bank"
                     },
                 }
@@ -165,25 +165,25 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="Drink1",
-                        cost=200,
+                        cost=1000,
                         descLoca="Upg_Drink"
                     },
                     new UpgradeLevel()
                     {
                         icon="Drink2",
-                        cost=275,
+                        cost=1250,
                         descLoca="Upg_Drink"
                     },
                     new UpgradeLevel()
                     {
                         icon="Drink3",
-                        cost=350,
+                        cost=1500,
                         descLoca="Upg_Drink"
                     },
                     new UpgradeLevel()
                     {
                         icon="Drink4",
-                        cost=425,
+                        cost=1500,
                         descLoca="Upg_Drink"
                     }
                 }
@@ -198,31 +198,31 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="SlowSpray1",
-                        cost=325,
+                        cost=1000,
                         descLoca="Upg_SlowBSODA"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlowSpray2",
-                        cost=500,
+                        cost=2000,
                         descLoca="Upg_SlowBSODA"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlowSpray3",
-                        cost=675,
+                        cost=2250,
                         descLoca="Upg_SlowBSODA"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlowSpray4",
-                        cost=1225,
+                        cost=3000,
                         descLoca="Upg_SlowBSODA"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlowSpray5",
-                        cost=1025,
+                        cost=4000,
                         descLoca="Upg_SlowBSODAMax"
                     }
                 }
@@ -237,25 +237,25 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="Stamina1",
-                        cost=400,
+                        cost=1000,
                         descLoca="Upg_Stamina"
                     },
                     new UpgradeLevel()
                     {
                         icon="Stamina2",
-                        cost=650,
+                        cost=1250,
                         descLoca="Upg_Stamina"
                     },
                     new UpgradeLevel()
                     {
                         icon="Stamina3",
-                        cost=900,
+                        cost=2000,
                         descLoca="Upg_Stamina"
                     },
                     new UpgradeLevel()
                     {
                         icon="Stamina4",
-                        cost=1150,
+                        cost=2500,
                         descLoca="Upg_Stamina"
                     }
                 }
@@ -270,7 +270,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="HungryBully",
-                        cost=350,
+                        cost=1000,
                         descLoca="Upg_HungryBully"
                     }
                 }
@@ -292,25 +292,25 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=100,
+                        cost=500,
                         descLoca="Upg_ItemSlot"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=300,
+                        cost=1000,
                         descLoca="Upg_ItemSlot"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=600,
+                        cost=800,
                         descLoca="Upg_ItemSlot"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=350,
+                        cost=700,
                         descLoca="Upg_ItemSlot"
                     }
                 }
@@ -326,67 +326,67 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ExtraLife",
-                        cost=200,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=800,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=800,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
                         cost=1000,
                         descLoca="Upg_ExtraLife"
                     },
                     new UpgradeLevel()
                     {
                         icon="ExtraLife",
-                        cost=1400,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=1600,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=1600,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=1650,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=1700,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=1750,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
                         cost=2000,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=4000,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=8000,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=9000,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=9300,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=9600,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=9900,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=9990,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=9998,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
+                        cost=9999,
                         descLoca="Upg_ExtraLifeLast"
                     },
                 }
@@ -401,7 +401,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="Favoritism",
-                        cost=350,
+                        cost=1500,
                         descLoca="Upg_Favoritism"
                     }
                 }
@@ -416,19 +416,19 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ClockSlow",
-                        cost=400,
+                        cost=3000,
                         descLoca="Upg_Timeslow"
                     },
                     new UpgradeLevel()
                     {
                         icon="ClockSlow2",
-                        cost=550,
+                        cost=5000,
                         descLoca="Upg_Timeslow2"
                     },
                     new UpgradeLevel()
                     {
                         icon="ClockSlow3",
-                        cost=850,
+                        cost=8000,
                         descLoca="Upg_Timeslow3"
                     }
                 }
@@ -443,25 +443,26 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ExtraPermaLife",
-                        cost=1000,
+                        cost=5000,
                         descLoca="Upg_BonusLife"
                     },
                     new UpgradeLevel()
                     {
                         icon="ExtraPermaLife",
-                        cost=3000,
+                        cost=8000,
                         descLoca="Upg_BonusLife"
                     },
                     new UpgradeLevel()
                     {
                         icon="ExtraPermaLife",
-                        cost=6000,
+                        cost=10000,
                         descLoca="Upg_BonusLife"
                     }
                 },
                 behavior = UpgradePurchaseBehavior.IncrementCounter
             });
             // ytps upgrade
+            /*
             Register(new StandardUpgrade()
             {
                 id = "ytpsmult",
@@ -487,7 +488,7 @@ namespace BaldiEndless
                         descLoca="Upg_MultiplyYTP"
                     }
                 }
-            });
+            });*/
             // speedy boots
             Register(new StandardUpgrade()
             {
@@ -498,13 +499,13 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="SpeedyBoots",
-                        cost=600,
+                        cost=1000,
                         descLoca="Upg_SpeedyBoots"
                     },
                     new UpgradeLevel()
                     {
                         icon="SpeedyBoots2",
-                        cost=900,
+                        cost=1500,
                         descLoca="Upg_SpeedyBoots2"
                     },
                     /*new UpgradeLevel() // why so expensive? because this is fucking overpowered.

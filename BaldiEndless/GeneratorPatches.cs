@@ -104,7 +104,8 @@ namespace BaldiEndless
             GeneratorData genData = new GeneratorData();
             EndlessFloorsPlugin.ExtendGenData(genData);
             EndlessFloorsPlugin.lastGenMaxNpcs = genData.npcs.Count;
-            __instance.ld.items = genData.items.ToArray();
+            __instance.ld.potentialItems = genData.items.ToArray();
+            __instance.ld.maxItemValue = currentFD.maxItemValue;
             __instance.seedOffset = currentFD.FloorID;
             __instance.ld.minSize = new IntVector2(currentFD.minSize, currentFD.minSize);
             __instance.ld.maxSize = new IntVector2(currentFD.maxSize, currentFD.maxSize);
@@ -125,7 +126,7 @@ namespace BaldiEndless
             }
             avgWeight /= genData.items.Count;
             //avgWeight = Mathf.CeilToInt(Mathf.Clamp(avgWeight * 2f, heighestWeight / 2f, heighestWeight - 25));
-            __instance.ld.fieldTripItems = genData.items.Where(x => x.weight < avgWeight).Select(x => new WeightedItem() { weight = x.weight, selection = x.selection}).ToList();
+            __instance.ld.fieldTripItems = genData.items.Where(x => (x.weight < avgWeight) && !x.selection.GetMeta().flags.HasFlag(ItemFlags.InstantUse)).Select(x => new WeightedItem() { weight = x.weight, selection = x.selection}).ToList();
             SceneObject floor2 = EndlessFloorsPlugin.Instance.SceneObjects.ToList().Find(x => x.levelTitle == "F2");
             __instance.ld.tripEntrancePre = floor2.levelObject.tripEntrancePre;
             __instance.ld.tripEntranceRoom = floor2.levelObject.tripEntranceRoom;
@@ -280,7 +281,7 @@ namespace BaldiEndless
 
             __instance.ld.specialRoomsStickToEdge = currentFD.FloorID < 15;
 
-            GeneratorManagement.Invoke("INF", currentFD.FloorID, __instance.ld);
+            GeneratorManagement.Invoke("INF", currentFD.FloorID, (CustomLevelObject)__instance.ld);
 
         }
     }

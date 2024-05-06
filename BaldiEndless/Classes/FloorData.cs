@@ -56,11 +56,19 @@ namespace BaldiEndless
             }
         }
 
+        public int maxItemValue
+        {
+            get
+            {
+                return Mathf.FloorToInt(maxFacultyRoomCount * maxFacultyRoomCount);
+            }
+        }
+
         public int classRoomCount
         {
             get
             {
-                return Mathf.CeilToInt(Mathf.Max(Mathf.Sqrt(unclampedScaleVar * 3f),2f));
+                return Mathf.CeilToInt(Mathf.Max(Mathf.Sqrt(unclampedScaleVar * 3f),4f));
             }
         }
 
