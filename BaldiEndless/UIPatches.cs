@@ -158,7 +158,7 @@ namespace BaldiEndless
                 EndlessFloorsPlugin.currentFloorData.FloorID = EndlessFloorsPlugin.Instance.selectedFloor;
                 gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
                 evl.Initialize();
-                Singleton<CoreGameManager>.Instance.AddPoints(9999 * 2, 0, false);
+                Singleton<CoreGameManager>.Instance.AddPoints(99999, 0, false);
                 EndlessFloorsPlugin.currentSave.Counters["slots"] = 5;
                 evl.QueueShop();
                 gl.SetSave(false);

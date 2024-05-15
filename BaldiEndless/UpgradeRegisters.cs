@@ -270,7 +270,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="HungryBully",
-                        cost=1000,
+                        cost=700,
                         descLoca="Upg_HungryBully"
                     }
                 }

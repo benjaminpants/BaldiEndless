@@ -111,7 +111,8 @@ namespace BaldiEndless
             __instance.ld.maxSize = new IntVector2(currentFD.maxSize, currentFD.maxSize);
             __instance.ld.previousLevels = new LevelObject[0];
 
-            __instance.ld.timeBonusVal = 1 * currentFD.FloorID;
+            __instance.ld.timeBonusVal = 15 * currentFD.FloorID;
+            __instance.ld.timeBonusLimit = 90f * Mathf.Ceil(currentFD.maxSize / 24f);
             __instance.ld.fieldTrip = ((currentFD.FloorID % 4 == 0) && currentFD.FloorID != 4) || currentFD.FloorID % 99 == 0;
             __instance.ld.fieldTrips = genData.fieldTrips.ToArray();
             int avgWeight = 0;
@@ -206,7 +207,7 @@ namespace BaldiEndless
             __instance.ld.minClassRooms = currentFD.classRoomCount;
             __instance.ld.maxClassRooms = currentFD.classRoomCount;
             __instance.ld.windowChance = Mathf.Max((currentFD.FloorID * -1.2f) + 14, 2);
-            __instance.ld.mapPrice = currentFD.FloorID * 25;
+            __instance.ld.mapPrice = (currentFD.FloorID * 25) * Mathf.CeilToInt(currentFD.FloorID / 8f);
             __instance.ld.maxPlots = currentFD.maxPlots;
             __instance.ld.minPlots = currentFD.minPlots;
             __instance.ld.outerEdgeBuffer = 3;
@@ -221,8 +222,8 @@ namespace BaldiEndless
             __instance.ld.maxFacultyRooms = currentFD.maxFacultyRoomCount;
             __instance.ld.minFacultyRooms = currentFD.minFacultyRoomCount;
 
-            __instance.ld.maxSpecialBuilders = Mathf.CeilToInt(currentFD.unclampedScaleVar / 11f);
-            __instance.ld.minSpecialBuilders = Mathf.CeilToInt((currentFD.unclampedScaleVar / 11f) / 1.5f);
+            __instance.ld.maxSpecialBuilders = Mathf.FloorToInt(currentFD.unclampedScaleVar / 16f);
+            __instance.ld.minSpecialBuilders = Mathf.FloorToInt((currentFD.unclampedScaleVar / 16f) / 1.5f);
 
             __instance.ld.maxEvents = Mathf.RoundToInt(currentFD.classRoomCount / 2f);
             __instance.ld.minEvents = Mathf.FloorToInt(currentFD.classRoomCount / 3);
@@ -279,7 +280,7 @@ namespace BaldiEndless
 
             __instance.ld.facultyStickToHallChance = currentFD.facultyStickToHall;
 
-            __instance.ld.specialRoomsStickToEdge = currentFD.FloorID < 15;
+            __instance.ld.specialRoomsStickToEdge = ((currentFD.FloorID < 22) || (currentFD.FloorID % 24 == 0)); //random bs for the fun of it lol
 
             GeneratorManagement.Invoke("INF", currentFD.FloorID, (CustomLevelObject)__instance.ld);
 

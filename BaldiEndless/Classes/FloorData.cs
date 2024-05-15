@@ -19,7 +19,7 @@ namespace BaldiEndless
                 YTPs += Mathf.FloorToInt(tempD.unclampedScaleVar * 2);
                 tempD.FloorID++;
             }
-
+            YTPs *= 6;
             return YTPs;
         }
 
@@ -60,7 +60,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.FloorToInt(maxFacultyRoomCount * maxFacultyRoomCount);
+                return Mathf.FloorToInt(maxFacultyRoomCount * maxFacultyRoomCount) + (25 * Mathf.CeilToInt(FloorID/2f));
             }
         }
 
@@ -68,7 +68,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.CeilToInt(Mathf.Max(Mathf.Sqrt(unclampedScaleVar * 3f),4f));
+                return Mathf.CeilToInt(Mathf.Max(Mathf.Sqrt(unclampedScaleVar * 3f),3f));
             }
         }
 
@@ -76,7 +76,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.Clamp(classRoomCount / 2, 3, 8);
+                return Mathf.Clamp(classRoomCount / 2, 4, 12);
             }
         }
 
@@ -84,14 +84,14 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.FloorToInt((FloorID / 1.6f) - 1);
+                return Mathf.FloorToInt((FloorID / 3f) - 1);
             }
         }
         public int minPlots
         {
             get
             {
-                return Mathf.CeilToInt(maxPlots * 0.7f);
+                return Mathf.Max(Mathf.CeilToInt(maxPlots * 0.7f),4);
             }
         }
 
@@ -99,7 +99,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.Max(Mathf.FloorToInt(maxSize / 20f), minSize >= 26 ? 1 : 0);
+                return Mathf.Max(Mathf.FloorToInt(maxSize / 30f), minSize >= 37 ? 1 : 0);
             }
         }
 

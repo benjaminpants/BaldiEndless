@@ -44,7 +44,7 @@ namespace BaldiEndless
         static private FieldInfo _defaultLives = AccessTools.Field(typeof(BaseGameManager), "defaultLives");
         public override void OnPurchase()
         {
-            Singleton<CoreGameManager>.Instance.SetLives((int)_defaultLives.GetValue(Singleton<BaseGameManager>.Instance));
+            Singleton<CoreGameManager>.Instance.SetLives(2 + EndlessFloorsPlugin.currentSave.GetUpgradeCount("bonuslife"));
             Singleton<ElevatorScreen>.Instance.Invoke("UpdateLives", 0f);
             base.OnPurchase();
         }
