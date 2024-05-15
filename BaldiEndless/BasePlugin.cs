@@ -212,7 +212,6 @@ namespace BaldiEndless
             allNotebooks.soundClip = AssetLoader.AudioClipFromMod(this, "BAL_Notebooks.wav");
             allNotebooks.MarkAsNeverUnload();
             ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
-            // TODO: make this not hard coded anymore.
             ITM_Present.potentialObjects.AddRange(new WeightedItemObject[]
             {
                 new WeightedItemObject()
@@ -294,6 +293,11 @@ namespace BaldiEndless
                 {
                     selection = items.FindByEnum(Items.ZestyBar).value,
                     weight = 70
+                },
+                new WeightedItemObject()
+                {
+                    selection = items.FindByEnum(Items.NanaPeel).value,
+                    weight = 66
                 },
             });
         }

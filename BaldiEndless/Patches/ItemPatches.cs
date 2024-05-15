@@ -132,7 +132,7 @@ namespace BaldiEndless
         class BootsSpeedManager : MonoBehaviour
         {
             private int bootsActive = 0;
-            MovementModifier speedMod = new MovementModifier(Vector3.zero, 1f + EndlessFloorsPlugin.currentSave.GetUpgradeCount("speedyboots") * 0.15f);
+            MovementModifier speedMod = new MovementModifier(Vector3.zero, 1f + EndlessFloorsPlugin.currentSave.GetUpgradeCount("speedyboots") * 0.1f);
 
             void Start()
             {

@@ -332,19 +332,19 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ExtraLife",
+                        cost=1000,
+                        descLoca="Upg_ExtraLife"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="ExtraLife",
                         cost=2000,
                         descLoca="Upg_ExtraLife"
                     },
                     new UpgradeLevel()
                     {
                         icon="ExtraLife",
-                        cost=4000,
-                        descLoca="Upg_ExtraLife"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="ExtraLife",
-                        cost=8000,
+                        cost=6000,
                         descLoca="Upg_ExtraLife"
                     },
                     new UpgradeLevel()
@@ -443,7 +443,7 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="ExtraPermaLife",
-                        cost=5000,
+                        cost=4000,
                         descLoca="Upg_BonusLife"
                     },
                     new UpgradeLevel()
