@@ -1,6 +1,7 @@
 ﻿using AlmostEngine;
 using HarmonyLib;
 using MTM101BaldAPI;
+using MTM101BaldAPI.PlusExtensions;
 using MTM101BaldAPI.Reflection;
 using System;
 using System.Collections;
@@ -56,7 +57,7 @@ namespace BaldiEndless
                 }
                 theTag.Use(__instance.Ec.Players[0]);
             }
-            __instance.Ec.Players[0].plm.staminaMax += EndlessFloorsPlugin.currentSave.GetUpgradeCount("stamina") * 25;
+            __instance.Ec.Players[0].plm.GetModifier().AddModifier("staminaMax", new MTM101BaldAPI.Components.ValueModifier(1, EndlessFloorsPlugin.currentSave.GetUpgradeCount("stamina") * 25));
             // Singleton<CoreGameManager>.Instance.AddPoints(10000,0,true);
             //__instance.Ec.Players[0].plm.stamina = __instance.Ec.Players[0].plm.staminaMax;
         }
