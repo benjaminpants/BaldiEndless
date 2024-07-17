@@ -172,7 +172,7 @@ namespace BaldiEndless
         {
             get
             {
-                float addend = Mathf.Clamp(FloorID * 2f, 16f, 24f);
+                float addend = Mathf.Clamp(FloorID * 8f, 16f, 24f);
                 return Mathf.CeilToInt((scaleVar / 7f) + addend);
             }
         }

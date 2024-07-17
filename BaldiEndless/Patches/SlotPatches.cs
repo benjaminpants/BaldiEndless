@@ -11,13 +11,9 @@ namespace BaldiEndless
     [HarmonyPatch("Awake")]
     class SlotAwakePatch
     {
-        static void Postfix(ItemManager __instance, ref bool[] ___slotLocked)
+        static void Prefix(ItemManager __instance)
         {
             __instance.maxItem = EndlessFloorsPlugin.currentSave.itemSlots - 1;
-            /*for (int i = 0; i < ___slotLocked.Length; i++)
-            {
-                ___slotLocked[i] = i > __instance.maxItem;
-            }*/
         }
     }
 
@@ -35,7 +31,7 @@ namespace BaldiEndless
         }
     }
 
-    [HarmonyPatch(typeof(HudManager))]
+    /*[HarmonyPatch(typeof(HudManager))]
     [HarmonyPatch("SetItemSelect")]
     class UpdateSetItemGraphics
     {
@@ -46,5 +42,5 @@ namespace BaldiEndless
                 ___itemSprites[i].sprite = (Sprite)EndlessFloorsPlugin.Instance.assetManager[typeof(Sprite), "OutOfOrderSlot"];
             }
         }
-    }
+    }*/
 }

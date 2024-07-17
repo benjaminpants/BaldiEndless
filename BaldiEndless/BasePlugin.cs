@@ -309,11 +309,11 @@ namespace BaldiEndless
             ObjectBuilderMetaStorage objs = MTM101BaldiDevAPI.objBuilderMeta;
             RandomEventMetaStorage rngs = MTM101BaldiDevAPI.randomEventStorage;
             ItemMetaStorage items = MTM101BaldiDevAPI.itemMetadata;
-            genData.fieldTrips.Add(new WeightedFieldTrip()
+            /*genData.fieldTrips.Add(new WeightedFieldTrip()
             {
                 weight=150,
                 selection=Resources.FindObjectsOfTypeAll<FieldTripObject>().Where(x => x.trip == FieldTrips.Camping).First()
-            });
+            });*/
             genData.npcs.AddRange(new WeightedNPC[]
             {
                 new WeightedNPC() {
@@ -870,6 +870,7 @@ namespace BaldiEndless
 
         public void UpdateData(ref SceneObject sceneObject)
         {
+            //if (sceneObject.levelObject == null) return; //preserve johnny shop
             sceneObject = currentSceneObject;
             sceneObject.levelNo = currentSave.currentFloor;
             sceneObject.nextLevel = sceneObject;

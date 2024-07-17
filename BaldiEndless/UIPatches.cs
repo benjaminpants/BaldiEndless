@@ -104,13 +104,6 @@ namespace BaldiEndless
                 evl.gameObject.SetActive(true);
                 gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
                 evl.Initialize();
-                if (!saveAvailable)
-                {
-                    if (EndlessFloorsPlugin.Instance.selectedFloor != 1)
-                    {
-                        evl.QueueShop();
-                    }
-                }
                 gl.SetSave(true);
                 if (saveAvailable)
                 {
@@ -160,7 +153,6 @@ namespace BaldiEndless
                 evl.Initialize();
                 Singleton<CoreGameManager>.Instance.AddPoints(99999, 0, false);
                 EndlessFloorsPlugin.currentSave.Counters["slots"] = 5;
-                evl.QueueShop();
                 gl.SetSave(false);
             });
             mText.OnHighlight.AddListener(() =>
@@ -203,7 +195,6 @@ namespace BaldiEndless
                 evl.gameObject.SetActive(true);
                 gl.LoadLevel(EndlessFloorsPlugin.currentSceneObject);
                 evl.Initialize();
-                evl.QueueShop();
                 gl.SetSave(false);
             });
 

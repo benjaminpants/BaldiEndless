@@ -14,10 +14,7 @@ namespace BaldiEndless
         public override void OnPurchase()
         {
             base.OnPurchase();
-            UpgradeShop.Instance.Purchased = new bool[8];
-            UpgradeShop.Instance.Upgrades.Clear();
-            UpgradeShop.Instance.PopulateShop();
-            UpgradeShop.Instance.GetComponent<StoreScreen>().BuyItem(-1); // this is actual dogshit code why havent i changed this
+            throw new NotImplementedException();
         }
     }
 
