@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MTM101BaldAPI.ObjectCreation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -311,6 +312,30 @@ namespace BaldiEndless
                     {
                         icon="SlotPlus",
                         cost=700,
+                        descLoca="Upg_ItemSlot"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="SlotPlus",
+                        cost=1000,
+                        descLoca="Upg_ItemSlot"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="SlotPlus",
+                        cost=1250,
+                        descLoca="Upg_ItemSlot"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="SlotPlus",
+                        cost=1500,
+                        descLoca="Upg_ItemSlot"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="SlotPlus",
+                        cost=1750,
                         descLoca="Upg_ItemSlot"
                     }
                 }

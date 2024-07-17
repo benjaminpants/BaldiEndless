@@ -16,6 +16,7 @@ using System.Xml.Linq;
 using MTM101BaldAPI.Registers;
 using MTM101BaldAPI.Reflection;
 using MTM101BaldAPI.ObjectCreation;
+using UnityEngine.Assertions;
 
 namespace BaldiEndless
 {
@@ -57,7 +58,9 @@ namespace BaldiEndless
         public string lastAllocatedPath = "";
 
         public static Items presentEnum = EnumExtensions.ExtendEnum<Items>("Present");
+        public static Items upgradeEnum = EnumExtensions.ExtendEnum<Items>("EndlessUpgrade");
         public static ItemObject presentObject;
+        public static ItemObject upgradeObject;
 
         public static EndlessSaveData mainSave = new EndlessSaveData();
         internal static EndlessSaveData freeSave = new EndlessSaveData();
@@ -155,9 +158,27 @@ namespace BaldiEndless
             }
         }
 
+        public static RoomAsset johnnyRoomAsset;
+
         // once all resources have been loaded
-        void OnResourcesLoaded()
+        IEnumerator OnResourcesLoaded()
         {
+            yield return 7;
+            yield return "Loading sprites/audio...";
+            string myPath = AssetLoader.GetModPath(this);
+            string iconPath = Path.Combine(myPath, "UpgradeIcons");
+            foreach (string p in Directory.GetFiles(iconPath))
+            {
+                Texture2D tex = AssetLoader.TextureFromFile(p);
+                Sprite spr = AssetLoader.SpriteFromTexture2D(tex, Vector2.one / 2f, 25f);
+                UpgradeIcons.Add(Path.GetFileNameWithoutExtension(p), spr);
+            }
+            assetManager.Add("UpgradeSlot5", AssetLoader.TextureFromMod(this, "UpgradeSlot5.png"));
+            assetManager.Add("OutOfOrderSlot", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "MissingSlot.png"), 50f));
+            assetManager.Add("TimeSlow", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeSlow.wav"), "Sfx_TimeSlow", SoundType.Effect, Color.blue));
+            assetManager.Add("TimeFast", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeFastFast.wav"), "Sfx_TimeFast", SoundType.Effect, Color.blue));
+            assetManager.AddRange<Sprite>(new Sprite[] { AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes4.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes5.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes6.png"), 1f) }, new string[] { "LifeTubes4", "LifeTubes5", "LifeTubes6" });
+            yield return "Adding Items/Upgrades...";
             Texture2D presentTex = AssetLoader.TextureFromMod(this, "PresentIcon_Large.png");
             Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);
             presentObject = new ItemBuilder(Info)
@@ -169,25 +190,56 @@ namespace BaldiEndless
                 .SetShopPrice(int.MaxValue)
                 .SetEnum(presentEnum)
                 .Build();
+
+            upgradeObject = new ItemBuilder(EndlessFloorsPlugin.Instance.Info)
+                .SetNameAndDescription("UPGRADE, ERROR", "ERROR ERROR ERROR! SHOULD NOT BE SEEING THIS!")
+                .SetSprites(assetManager.Get<Sprite>("OutOfOrderSlot"), assetManager.Get<Sprite>("OutOfOrderSlot"))
+                .SetAsInstantUse()
+                .SetItemComponent<Item>()
+                .SetGeneratorCost(50)
+                .SetShopPrice(999)
+                .SetEnum(EndlessFloorsPlugin.upgradeEnum)
+                .Build();
+
+            EndlessUpgradeRegisters.Register(new StandardUpgrade()
+            {
+                id = "none",
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="NO",
+                        cost=0,
+                        descLoca="Upg_None"
+                    }
+                },
+                weight = 0
+            });
+            EndlessUpgradeRegisters.Register(new BrokenUpgrade()
+            {
+                id = "error",
+                levels = new UpgradeLevel[]
+                {
+                    new UpgradeLevel()
+                    {
+                        icon="Error",
+                        cost=0,
+                        descLoca="Upg_Error"
+                    }
+                },
+                weight = 0,
+                behavior = UpgradePurchaseBehavior.Nothing
+            });
+            EndlessUpgradeRegisters.RegisterDefaults();
+            yield return "Locating happy Baldis...";
             assetManager.AddRange<HappyBaldi>(Resources.FindObjectsOfTypeAll<HappyBaldi>(), (bald) =>
             {
                 if (bald.name == "HappyBaldi") return "HappyBaldi1";
                 return bald.name;
             }); //we need the happy baldis
+            yield return "Registering Cubemap...";
             assetManager.AddRange<Cubemap>(Resources.FindObjectsOfTypeAll<Cubemap>().Where(x => (x.name == "Cubemap_DayStandard" || x.name == "Cubemap_Twilight")).ToArray());
             Cubemap darkCubemap = AssetLoader.CubemapFromTexture(AssetLoader.TextureFromMod(this, "DarkSky_OneImage.png"));
-            /*Cubemap templateMap = (Cubemap)assetManager[typeof(Cubemap), "Cubemap_Default"];
-            Cubemap newCubemap = new Cubemap(256, templateMap.format, false);
-            newCubemap.filterMode = FilterMode.Point;
-            Texture2D tex = AssetLoader.TextureFromMod(this, "DarkSky.png");
-            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.PositiveY);
-            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.PositiveX);
-            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.PositiveZ);
-            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.NegativeZ);
-            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.NegativeX);
-            newCubemap.SetPixels(tex.GetPixels(), CubemapFace.NegativeY);
-            newCubemap.name = "Cubemap_DarkSky";
-            newCubemap.Apply();*/
             darkCubemap.name = "Cubemap_DarkSky";
             SkyboxMetaStorage.Instance.Add(new SkyboxMetadata(Info, darkCubemap, new Color(46f / 255f, 52f / 255f, 68f / 255f)));
             SkyboxMetaStorage.Instance.Find(x => x.value.name == "Cubemap_Twilight").lightColor = new Color(239f / 255f, 188f / 255f, 162f / 255f);
@@ -196,6 +248,41 @@ namespace BaldiEndless
             currentSceneObject = SceneObjects.Where(x => x.levelTitle == "F3").First();
             float baseGameMultiplier = 1.5f;
             // add back in the base game textures
+            yield return "Loading Map Textures...";
+            string wallsPath = Path.Combine(myPath, "Textures", "Walls");
+            foreach (string p in Directory.GetFiles(wallsPath))
+            {
+                string standardName = Path.GetFileNameWithoutExtension(p);
+                if (standardName.StartsWith("F_")) continue; // no.
+                Texture2D tex = AssetLoader.TextureFromFile(p);
+                string[] splitee = standardName.Split('!');
+                wallTextures.Add(new WeightedTexture2D()
+                {
+                    selection = tex,
+                    weight = int.Parse(splitee[1])
+                });
+                string facultyEquiv = Path.Combine(wallsPath, "F_" + splitee[0] + ".png");
+                if (File.Exists(facultyEquiv))
+                {
+                    Texture2D texf = AssetLoader.TextureFromFile(facultyEquiv);
+                    facultyWallTextures.Add(new WeightedTexture2D()
+                    {
+                        selection = texf,
+                        weight = int.Parse(splitee[1])
+                    });
+                }
+                else
+                {
+                    facultyWallTextures.Add(new WeightedTexture2D()
+                    {
+                        selection = tex,
+                        weight = int.Parse(splitee[1])
+                    });
+                }
+            }
+            AddWeightedTextures(ref ceilTextures, "Ceilings");
+            AddWeightedTextures(ref floorTextures, "Floors");
+            AddWeightedTextures(ref profFloorTextures, "ProfFloors");
             EndlessFloorsPlugin.wallTextures.AddRange(currentSceneObject.levelObject.classWallTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
             EndlessFloorsPlugin.wallTextures.AddRange(currentSceneObject.levelObject.hallWallTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
             EndlessFloorsPlugin.facultyWallTextures.AddRange(currentSceneObject.levelObject.facultyWallTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
@@ -205,8 +292,8 @@ namespace BaldiEndless
             EndlessFloorsPlugin.floorTextures.AddRange(currentSceneObject.levelObject.hallFloorTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
             EndlessFloorsPlugin.profFloorTextures.AddRange(currentSceneObject.levelObject.facultyFloorTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
             EndlessFloorsPlugin.profFloorTextures.AddRange(currentSceneObject.levelObject.classFloorTexs.Select(x => new WeightedTexture2D() { weight = Mathf.RoundToInt(x.weight * baseGameMultiplier), selection = x.selection }));
-            // obliterate CONVEYOR BELT SUBTITLES
-            Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "ConveyorBeltLoop").First().subtitle = false; //MYSTMAN12!!!!!!
+
+            yield return "Finalizing...";
             SoundObject allNotebooks = Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "BAL_AllNotebooks_9").First();
             allNotebooks.subtitle = false;
             allNotebooks.soundClip = AssetLoader.AudioClipFromMod(this, "BAL_Notebooks.wav");
@@ -300,7 +387,37 @@ namespace BaldiEndless
                     weight = 66
                 },
             });
+            yield return "Setting up Upgrade Station!";
+            johnnyRoomAsset = RoomAssetMetaStorage.Instance.Find(x => x.name == "Room_JohnnysStore").value;
+            RoomAsset upgradeRoom = ScriptableObject.Instantiate<RoomAsset>(johnnyRoomAsset);
+            upgradeRoom.roomFunctionContainer.gameObject.SetActive(false);
+            RoomFunctionContainer upgradeContainer = GameObject.Instantiate<RoomFunctionContainer>(upgradeRoom.roomFunctionContainer);
+            upgradeRoom.roomFunctionContainer.gameObject.SetActive(true);
+            upgradeContainer.gameObject.ConvertToPrefab(true);
+            List<RoomFunction> roomFuncs = (List<RoomFunction>)upgradeContainer.ReflectionGetVariable("functions");
+            int storeIndex = roomFuncs.FindIndex(x => (x.GetType() == typeof(StoreRoomFunction)));
+            if (storeIndex == -1) throw new Exception("Couldn't find store room function!");
+            StoreRoomFunction storeBase = (StoreRoomFunction)roomFuncs[storeIndex];
+            UpgradeStoreFunction upgStoreFunc = storeBase.gameObject.AddComponent<UpgradeStoreFunction>();
+            upgStoreFunc.roomBase = (Transform)storeBase.ReflectionGetVariable("roomBase");
+            upgStoreFunc.johnnyBase = (Transform)storeBase.ReflectionGetVariable("johnnyBase");
+            roomFuncs.RemoveAt(storeIndex); //bye bye
+            GameObject.Destroy(storeBase);
+            PriceTag[] tags = (PriceTag[])storeBase.ReflectionGetVariable("tag"); //mystman12 why. sigh i hope this grabs the right one
+            for (int i = 0; i < tags.Length; i++)
+            {
+                upgStoreFunc.priceTags.Add(tags[i]);
+            }
+            upgradeContainer.AddFunction(upgStoreFunc);
+            upgradeContainer.name = "UpgradeStoreContainer";
+            upgradeRoom.roomFunctionContainer = upgradeContainer;
+            ((UnityEngine.Object)upgradeRoom).name = "UpgradeStation";
+            upgradeRoom.name = "UpgradeStore";
+            upgradeRoomAsset = upgradeRoom;
+            Resources.FindObjectsOfTypeAll<SceneObject>().First(x => x.manager.GetType() == typeof(PitstopGameManager)).levelAsset.roomAssetPlacements[1].room = upgradeRoomAsset;
         }
+
+        public static RoomAsset upgradeRoomAsset;
 
         internal static void ExtendGenData(GeneratorData genData)
         {
@@ -766,53 +883,6 @@ namespace BaldiEndless
             Instance = this;
             Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.endlessfloors");
             string myPath = AssetLoader.GetModPath(this);
-            string iconPath = Path.Combine(myPath, "UpgradeIcons");
-            foreach (string p in Directory.GetFiles(iconPath))
-            {
-                Texture2D tex = AssetLoader.TextureFromFile(p);
-                Sprite spr = AssetLoader.SpriteFromTexture2D(tex, Vector2.one / 2f, 50f);
-                UpgradeIcons.Add(Path.GetFileNameWithoutExtension(p), spr);
-            }
-
-            string wallsPath = Path.Combine(myPath, "Textures", "Walls");
-            foreach (string p in Directory.GetFiles(wallsPath))
-            {
-                string standardName = Path.GetFileNameWithoutExtension(p);
-                if (standardName.StartsWith("F_")) continue; // no.
-                Texture2D tex = AssetLoader.TextureFromFile(p);
-                string[] splitee = standardName.Split('!');
-                wallTextures.Add(new WeightedTexture2D()
-                {
-                    selection = tex,
-                    weight = int.Parse(splitee[1])
-                });
-                string facultyEquiv = Path.Combine(wallsPath, "F_" + splitee[0] + ".png");
-                if (File.Exists(facultyEquiv))
-                {
-                    Texture2D texf = AssetLoader.TextureFromFile(facultyEquiv);
-                    facultyWallTextures.Add(new WeightedTexture2D()
-                    {
-                        selection = texf,
-                        weight = int.Parse(splitee[1])
-                    });
-                }
-                else
-                {
-                    facultyWallTextures.Add(new WeightedTexture2D()
-                    {
-                        selection = tex,
-                        weight = int.Parse(splitee[1])
-                    });
-                }
-            }
-            AddWeightedTextures(ref ceilTextures, "Ceilings");
-            AddWeightedTextures(ref floorTextures, "Floors");
-            AddWeightedTextures(ref profFloorTextures, "ProfFloors");
-
-            assetManager.Add("UpgradeSlot5", AssetLoader.TextureFromMod(this, "UpgradeSlot5.png"));
-            assetManager.Add("OutOfOrderSlot", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "MissingSlot.png"), 1f));
-            assetManager.Add("TimeSlow", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeSlow.wav"), "Sfx_TimeSlow", SoundType.Effect, Color.blue));
-            assetManager.Add("TimeFast", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeFastFast.wav"), "Sfx_TimeFast", SoundType.Effect, Color.blue));
             ModdedSaveSystem.AddSaveLoadAction(this, SaveLoadHighestFloor);
             StartCoroutine(WaitTilAllLoaded(harmony));
 
@@ -820,40 +890,8 @@ namespace BaldiEndless
             string midiPath = Path.Combine(myPath, "Midi");
             EndlessFloorsPlugin.F99MusicStart = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_beginning.mid"), "99start");
             EndlessFloorsPlugin.F99MusicLoop = AssetLoader.MidiFromFile(Path.Combine(midiPath, "floor_99_finale_loop.mid"), "99loop");
-            EndlessUpgradeRegisters.Register(new StandardUpgrade()
-            {
-                id = "none",
-                levels = new UpgradeLevel[]
-                {
-                    new UpgradeLevel()
-                    {
-                        icon="NO",
-                        cost=0,
-                        descLoca="Upg_None"
-                    }
-                },
-                weight = 0
-            });
-            EndlessUpgradeRegisters.Register(new BrokenUpgrade()
-            {
-                id = "error",
-                levels = new UpgradeLevel[]
-                {
-                    new UpgradeLevel()
-                    {
-                        icon="Error",
-                        cost=0,
-                        descLoca="Upg_Error"
-                    }
-                },
-                weight = 0,
-                behavior=UpgradePurchaseBehavior.Nothing
-            });
-            EndlessUpgradeRegisters.RegisterDefaults();
             MTM101BaldAPI.SaveSystem.ModdedSaveGame.AddSaveHandler(new EndlessFloorsSaveHandler());
-            MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(Info, OnResourcesLoaded, true);
-
-            assetManager.AddRange<Sprite>(new Sprite[] { AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes4.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes5.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes6.png"), 1f) }, new string[] { "LifeTubes4", "LifeTubes5", "LifeTubes6"});
+            MTM101BaldAPI.Registers.LoadingEvents.RegisterOnAssetsLoaded(Info, OnResourcesLoaded(), false);
 
         }
 

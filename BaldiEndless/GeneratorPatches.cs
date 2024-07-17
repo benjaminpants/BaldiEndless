@@ -111,6 +111,7 @@ namespace BaldiEndless
             EndlessFloorsPlugin.lastGenMaxNpcs = genData.npcs.Count;
             CustomLevelObject lvlObj = (CustomLevelObject)__instance.ld;
             lvlObj.potentialItems = genData.items.ToArray();
+            lvlObj.forcedItems.Add(EndlessFloorsPlugin.upgradeObject);
             lvlObj.maxItemValue = currentFD.maxItemValue;
             __instance.seedOffset = currentFD.FloorID;
             lvlObj.minSize = new IntVector2(currentFD.minSize, currentFD.minSize);
