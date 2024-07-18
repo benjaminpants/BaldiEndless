@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace BaldiEndless
 {
-    [HarmonyPatch(typeof(BaseGameManager))]
+    [HarmonyPatch(typeof(MainGameManager))]
     [HarmonyPatch("LoadNextLevel")]
     class EternallyStuckV2
     {
@@ -19,41 +19,27 @@ namespace BaldiEndless
             BonusLifeUpgrade._defaultLives.SetValue(Singleton<BaseGameManager>.Instance, 2 + EndlessFloorsPlugin.currentSave.GetUpgradeCount("bonuslife"));
             SceneObject endlessSceneObject = EndlessFloorsPlugin.currentSceneObject;
             EndlessFloorsPlugin.Instance.UpdateData(ref endlessSceneObject);
-            return true;
-        }
-    }
-
-    [HarmonyPatch(typeof(BaseGameManager))]
-    [HarmonyPatch("LoadSceneObject")]
-    [HarmonyPatch(new Type[] { typeof(SceneObject), typeof(bool)})]
-    class EternallyStuckV3
-    {
-        static void Prefix(SceneObject sceneObject)
-        {
-            if (sceneObject.levelObject == null) //we have completed the level and we are loading into the pitstop
+            EndlessFloorsPlugin.currentSave.currentFloor += 1;
+            EndlessFloorsPlugin.currentSave.claimedFreeUpgradeCurrentFloor = false;
+            EndlessFloorsPlugin.Instance.UpdateData(ref endlessSceneObject);
+            if ((Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode) || (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free))
             {
-                EndlessFloorsPlugin.currentSave.currentFloor += 1;
-                EndlessFloorsPlugin.currentSave.claimedFreeUpgradeCurrentFloor = false;
-                SceneObject endlessSceneObject = EndlessFloorsPlugin.currentSceneObject;
-                EndlessFloorsPlugin.Instance.UpdateData(ref endlessSceneObject);
-                if ((Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode) || (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free))
+                if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
                 {
-                    if (EndlessFloorsPlugin.currentFloorData.FloorID != EndlessFloorsPlugin.Instance.selectedFloor)
-                    {
-                        UnityEngine.Object.Destroy(Singleton<ElevatorScreen>.Instance.gameObject);
-                        Singleton<CoreGameManager>.Instance.Quit();
-                        return;
-                    }
-                }
-                if (!((Singleton<CoreGameManager>.Instance.currentMode == Mode.Free) || (Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode)))
-                {
-                    if (EndlessFloorsPlugin.currentFloorData.FloorID > EndlessFloorsPlugin.Instance.highestFloorCount)
-                    {
-                        EndlessFloorsPlugin.Instance.highestFloorCount = EndlessFloorsPlugin.currentFloorData.FloorID;
-                        EndlessFloorsPlugin.Instance.SaveHighestFloor();
-                    }
+                    UnityEngine.Object.Destroy(Singleton<ElevatorScreen>.Instance.gameObject);
+                    Singleton<CoreGameManager>.Instance.Quit();
+                    return false;
                 }
             }
+            if (!((Singleton<CoreGameManager>.Instance.currentMode == Mode.Free) || (Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode)))
+            {
+                if (EndlessFloorsPlugin.currentFloorData.FloorID > EndlessFloorsPlugin.Instance.highestFloorCount)
+                {
+                    EndlessFloorsPlugin.Instance.highestFloorCount = EndlessFloorsPlugin.currentFloorData.FloorID;
+                    EndlessFloorsPlugin.Instance.SaveHighestFloor();
+                }
+            }
+            return true;
         }
     }
 
