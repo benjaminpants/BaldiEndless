@@ -14,7 +14,9 @@ namespace BaldiEndless
         public override void OnPurchase()
         {
             base.OnPurchase();
-            throw new NotImplementedException();
+            if (!UpgradeStoreFunction.Instance) return;
+            UpgradeStoreFunction.Instance.Restock();
+            //throw new NotImplementedException();
         }
     }
 
@@ -33,6 +35,7 @@ namespace BaldiEndless
             base.OnPurchase();
             Singleton<CoreGameManager>.Instance.GetPlayer(0).itm.ReflectionSetVariable("maxItem", EndlessFloorsPlugin.currentSave.itemSlots - 1);
             Singleton<CoreGameManager>.Instance.GetPlayer(0).itm.UpdateItems();
+            Singleton<CoreGameManager>.Instance.GetHud(0).UpdateInventorySize(EndlessFloorsPlugin.currentSave.itemSlots);
         }
     }
 

@@ -22,7 +22,7 @@ namespace BaldiEndless
 {
 
     [BepInDependency("mtm101.rulerp.bbplus.baldidevapi")]
-    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "3.0.0.1")]
+    [BepInPlugin("mtm101.rulerp.baldiplus.endlessfloors", "Endless Floors", "4.0.0.0")]
     public class EndlessFloorsPlugin : BaseUnityPlugin
     {
         public AssetManager assetManager = new AssetManager();
@@ -158,7 +158,7 @@ namespace BaldiEndless
             }
         }
 
-        public static RoomAsset johnnyRoomAsset;
+        public static RoomGroup storeRoomGroup;
 
         // once all resources have been loaded
         IEnumerator OnResourcesLoaded()
@@ -388,7 +388,7 @@ namespace BaldiEndless
                 },
             });
             yield return "Setting up Upgrade Station!";
-            johnnyRoomAsset = RoomAssetMetaStorage.Instance.Find(x => x.name == "Room_JohnnysStore").value;
+            RoomAsset johnnyRoomAsset = RoomAssetMetaStorage.Instance.Find(x => x.name == "Room_JohnnysStore").value;
             RoomAsset upgradeRoom = ScriptableObject.Instantiate<RoomAsset>(johnnyRoomAsset);
             upgradeRoom.roomFunctionContainer.gameObject.SetActive(false);
             RoomFunctionContainer upgradeContainer = GameObject.Instantiate<RoomFunctionContainer>(upgradeRoom.roomFunctionContainer);
@@ -415,6 +415,10 @@ namespace BaldiEndless
             upgradeRoom.name = "UpgradeStore";
             upgradeRoomAsset = upgradeRoom;
             Resources.FindObjectsOfTypeAll<SceneObject>().First(x => x.manager.GetType() == typeof(PitstopGameManager)).levelAsset.roomAssetPlacements[1].room = upgradeRoomAsset;
+            storeRoomGroup = Resources.FindObjectsOfTypeAll<LevelObject>().First(x => x.name == "Endless1").roomGroup.First(x => x.name == "Store");
+            List<RoomGroup> rmGL = currentSceneObject.levelObject.roomGroup.ToList();
+            rmGL.Insert(0, storeRoomGroup);
+            currentSceneObject.levelObject.roomGroup = rmGL.ToArray();
         }
 
         public static RoomAsset upgradeRoomAsset;
@@ -591,8 +595,13 @@ namespace BaldiEndless
                 },
                 new WeightedObjectBuilder()
                 {
-                    selection = objs.Get(Obstacle.Null, "BsodaHallBuilder").value,
+                    selection = objs.Get(Obstacle.Null, "DietBsodaHallBuilder").value,
                     weight = 100
+                },
+                new WeightedObjectBuilder()
+                {
+                    selection = objs.Get(Obstacle.Null, "BsodaHallBuilder").value,
+                    weight = 25
                 },
                 new WeightedObjectBuilder()
                 {
@@ -633,6 +642,7 @@ namespace BaldiEndless
                     weight = 90
                 }
             });
+            genData.forcedObjectBuilders.Add(objs.Find(x => x.value.name == "StorageLockerHallBuilder").value);
             genData.randomEvents.AddRange(new WeightedRandomEvent[]
             {
                 new WeightedRandomEvent()
@@ -686,7 +696,7 @@ namespace BaldiEndless
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.Apple).value,
-                    weight = 1
+                    weight = 2
                 },
                 new WeightedItemObject()
                 {
@@ -746,7 +756,7 @@ namespace BaldiEndless
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.Teleporter).value,
-                    weight = 45
+                    weight = 20
                 },
                 new WeightedItemObject()
                 {
@@ -755,8 +765,13 @@ namespace BaldiEndless
                 },
                 new WeightedItemObject()
                 {
+                    selection = items.FindByEnum(Items.DietBsoda).value,
+                    weight = 50
+                },
+                new WeightedItemObject()
+                {
                     selection = items.FindByEnum(Items.Bsoda).value,
-                    weight = 40
+                    weight = 10
                 },
                 new WeightedItemObject()
                 {

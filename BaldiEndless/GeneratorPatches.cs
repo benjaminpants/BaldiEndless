@@ -33,6 +33,7 @@ namespace BaldiEndless
             if (sceneObject.levelObject == null) //we have completed the level and we are loading into the pitstop
             {
                 EndlessFloorsPlugin.currentSave.currentFloor += 1;
+                EndlessFloorsPlugin.currentSave.claimedFreeUpgradeCurrentFloor = false;
                 SceneObject endlessSceneObject = EndlessFloorsPlugin.currentSceneObject;
                 EndlessFloorsPlugin.Instance.UpdateData(ref endlessSceneObject);
                 if ((Singleton<CoreGameManager>.Instance.currentMode == EndlessFloorsPlugin.NNFloorMode) || (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free))
@@ -111,7 +112,7 @@ namespace BaldiEndless
             EndlessFloorsPlugin.lastGenMaxNpcs = genData.npcs.Count;
             CustomLevelObject lvlObj = (CustomLevelObject)__instance.ld;
             lvlObj.potentialItems = genData.items.ToArray();
-            lvlObj.forcedItems.Add(EndlessFloorsPlugin.upgradeObject);
+            lvlObj.forcedItems = new List<ItemObject>();
             lvlObj.maxItemValue = currentFD.maxItemValue;
             __instance.seedOffset = currentFD.FloorID;
             lvlObj.minSize = new IntVector2(currentFD.minSize, currentFD.minSize);
@@ -139,6 +140,9 @@ namespace BaldiEndless
             //lvlObj.tripEntrancePre = floor2.levelObject.tripEntrancePre;
             //lvlObj.tripEntranceRoom = floor2.levelObject.tripEntranceRoom;
 
+            lvlObj.roomGroup[0].maxRooms = (((currentFD.FloorID % 4) == 0) ? 1 : 0);
+            lvlObj.roomGroup[0].minRooms = lvlObj.roomGroup[0].maxRooms;
+
             lvlObj.hallWallTexs = EndlessFloorsPlugin.wallTextures.ToArray();
             lvlObj.hallFloorTexs = EndlessFloorsPlugin.floorTextures.ToArray();
             lvlObj.hallCeilingTexs = EndlessFloorsPlugin.ceilTextures.ToArray();
@@ -150,6 +154,11 @@ namespace BaldiEndless
             stableRng.Next();
 
             System.Random rng = new System.Random(Singleton<CoreGameManager>.Instance.Seed() + __instance.seedOffset);
+
+            if (rng.Next(20) == 10)
+            {
+                lvlObj.forcedItems.Add(EndlessFloorsPlugin.upgradeObject);
+            }
 
             Color warmColor = new Color(255f / 255f, 202 / 255f, 133 / 255f);
             Color coldColor = new Color(133f / 255f, 161f / 255f, 255f / 255f);

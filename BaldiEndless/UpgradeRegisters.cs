@@ -265,7 +265,7 @@ namespace BaldiEndless
             Register(new StandardUpgrade()
             {
                 id = "hungrybully",
-                weight = 90,
+                weight = 85,
                 levels = new UpgradeLevel[]
                 {
                     new UpgradeLevel()
@@ -280,7 +280,7 @@ namespace BaldiEndless
             Register(new SlotUpgrade()
             {
                 id = "slots",
-                weight = 92,
+                weight = 90,
                 behavior=UpgradePurchaseBehavior.IncrementCounter,
                 levels = new UpgradeLevel[]
                 {
@@ -317,25 +317,25 @@ namespace BaldiEndless
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=1000,
-                        descLoca="Upg_ItemSlot"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="SlotPlus",
-                        cost=1250,
-                        descLoca="Upg_ItemSlot"
-                    },
-                    new UpgradeLevel()
-                    {
-                        icon="SlotPlus",
                         cost=1500,
                         descLoca="Upg_ItemSlot"
                     },
                     new UpgradeLevel()
                     {
                         icon="SlotPlus",
-                        cost=1750,
+                        cost=2000,
+                        descLoca="Upg_ItemSlot"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="SlotPlus",
+                        cost=2500,
+                        descLoca="Upg_ItemSlot"
+                    },
+                    new UpgradeLevel()
+                    {
+                        icon="SlotPlus",
+                        cost=4000,
                         descLoca="Upg_ItemSlot"
                     }
                 }

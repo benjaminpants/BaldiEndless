@@ -173,7 +173,7 @@ namespace BaldiEndless
             get
             {
                 float addend = Mathf.Clamp(FloorID * 8f, 16f, 24f);
-                return Mathf.CeilToInt((scaleVar / 7f) + addend);
+                return Mathf.Max(Mathf.CeilToInt((scaleVar / 7f) + addend), 19);
             }
         }
 
@@ -199,7 +199,7 @@ namespace BaldiEndless
         {
             get
             {
-                return Mathf.CeilToInt(maxSize / 1.24f);
+                return Mathf.Clamp(Mathf.CeilToInt(maxSize / 1.24f),19, maxSize);
             }
         }
     }

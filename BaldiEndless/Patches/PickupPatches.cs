@@ -94,7 +94,10 @@ namespace BaldiEndless.Patches
             }
             if (!EndlessFloorsPlugin.currentSave.PurchaseUpgrade(upg, upg.behavior)) return false;
             upg.OnPurchase();
-            EndlessFloorsPlugin.currentSave.claimedFreeUpgradeCurrentFloor = true;
+            if (__instance.free)
+            {
+                EndlessFloorsPlugin.currentSave.claimedFreeUpgradeCurrentFloor = true;
+            }
             UpgradePickupMarker.UpdateAllUpgrades();
             return false;
         }

@@ -34,7 +34,7 @@ namespace BaldiEndless
         public int startingFloor = 1;
         public bool claimedFreePoints = false;
         public bool claimedFreeUpgradeCurrentFloor = false;
-        public bool claimedTicketCurrentFloor = false;
+        //public bool claimedTicketCurrentFloor = false;
         public byte savedGrade = 16;
         public byte itemSlots => Counters["slots"];
 
@@ -144,7 +144,7 @@ namespace BaldiEndless
             }
             writer.Write(savedGrade);
             writer.Write(claimedFreeUpgradeCurrentFloor);
-            writer.Write(claimedTicketCurrentFloor);
+            //writer.Write(claimedTicketCurrentFloor);
         }
 
         public static EndlessSaveData Load(BinaryReader reader)
@@ -168,7 +168,7 @@ namespace BaldiEndless
             data.savedGrade = reader.ReadByte();
             if (version == 0) return data;
             data.claimedFreeUpgradeCurrentFloor = reader.ReadBoolean();
-            data.claimedTicketCurrentFloor = reader.ReadBoolean();
+            //data.claimedTicketCurrentFloor = reader.ReadBoolean();
             return data;
         }
     }

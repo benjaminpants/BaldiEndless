@@ -32,6 +32,20 @@ namespace BaldiEndless
         public Transform roomBase;
         public Transform johnnyBase;
 
+
+        private void ItemCollected(Pickup pickup, int player)
+        {
+            //this.MarkItemAsSold(pickup);
+            purchasedItems[pickups.IndexOf(pickup)] = true;
+            pickup.price = 0;
+            pickup.showDescription = false;
+            if (pickup == mapPickup)
+            {
+                //this.BuyMap();
+            }
+            UpdateAllTags();
+        }
+
         public override void Initialize(RoomController room)
         {
             base.Initialize(room);
@@ -41,7 +55,6 @@ namespace BaldiEndless
             {
                 door.Unlock();
             }
-            purchasedItems = new bool[shopItems];
             int i = 0;
             while (i < shopItems && i < room.itemSpawnPoints.Count)
             {
@@ -49,7 +62,7 @@ namespace BaldiEndless
                 Pickup pickup = room.ec.CreateItem(room, Singleton<CoreGameManager>.Instance.NoneItem, itemSpawnPoint.position);
                 //pickup.OnItemPurchased += this.ItemPurchased;
                 //pickup.OnItemDenied += this.ItemDenied;
-                //pickup.OnItemCollected += this.ItemCollected;
+                pickup.OnItemCollected += this.ItemCollected;
                 pickup.showDescription = true;
                 pickups.Add(pickup);
                 i++;
@@ -75,7 +88,7 @@ namespace BaldiEndless
                     }
                     continue;
                 }
-                int originalPrice = upgrades[i].CalculateSellPrice(EndlessFloorsPlugin.currentSave.GetUpgradeCount(upgrades[i].id));
+                int originalPrice = upgrades[i].GetCost(EndlessFloorsPlugin.currentSave.GetUpgradeCount(upgrades[i].id));
                 int finalPrice = originalPrice;
                 if (discounts.ContainsKey(i))
                 {
@@ -97,14 +110,15 @@ namespace BaldiEndless
         public void Restock()
         {
             discounts = new Dictionary<int, float>();
-            purchasedItems = new bool[0];
+            purchasedItems = new bool[shopItems];
+            upgrades.Clear();
             PopulateShop();
             for (int i = 0; i < pickups.Count; i++)
             {
                 Pickup pickup = pickups[i];
-                pickup.gameObject.AddComponent<UpgradePickupMarker>().upgrade = upgrades[i];
+                pickup.gameObject.GetOrAddComponent<UpgradePickupMarker>().upgrade = upgrades[i];
                 pickup.AssignItem(EndlessFloorsPlugin.upgradeObject);
-                int originalPrice = upgrades[i].CalculateSellPrice(EndlessFloorsPlugin.currentSave.GetUpgradeCount(upgrades[i].id));
+                int originalPrice = upgrades[i].GetCost(EndlessFloorsPlugin.currentSave.GetUpgradeCount(upgrades[i].id));
                 int finalPrice = originalPrice;
 
                 if (UnityEngine.Random.value < saleChance)
@@ -114,6 +128,7 @@ namespace BaldiEndless
                 }
                 pickup.price = finalPrice;
                 pickup.showDescription = true;
+                pickup.free = false;
                 pickup.gameObject.SetActive(true);
             }
             UpdateAllTags();
@@ -143,7 +158,7 @@ namespace BaldiEndless
         {
             try
             {
-                int randRang = shopItems;
+                int randRang = shopItems - (alwaysAddReroll ? 1 : 0);
                 List<WeightedSelection<StandardUpgrade>> upgradesTemp = new List<WeightedSelection<StandardUpgrade>>();
                 EndlessFloorsPlugin.Upgrades.Do(x =>
                 {
