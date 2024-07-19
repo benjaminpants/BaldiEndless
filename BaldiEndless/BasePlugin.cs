@@ -427,6 +427,25 @@ namespace BaldiEndless
             ((UnityEngine.Object)upgradeRoom).name = "UpgradeStation";
             upgradeRoom.name = "UpgradeStore";
             upgradeRoomAsset = upgradeRoom;
+            upgradeRoom.wallTex = AssetLoader.TextureFromMod(this, "Daniel", "DanielWall.png");
+            upgradeRoom.florTex = AssetLoader.TextureFromMod(this, "Daniel", "DanielFloor.png");
+            upgradeRoom.ceilTex = AssetLoader.TextureFromMod(this, "Daniel", "DanielCeil.png");
+            upgradeRoom.posterDatas.Clear();
+
+            Spinner spinClone = GameObject.Instantiate<Spinner>(Resources.FindObjectsOfTypeAll<Spinner>().First(x => x.gameObject.name == "JohnnySign"));
+            spinClone.name = "SpookyScarySkeletonSign";
+            spinClone.ReflectionSetVariable("rotationSpeed", ((float)spinClone.ReflectionGetVariable("rotationSpeed")) * 2.5f);
+            spinClone.GetComponent<SpriteRenderer>().sprite = AssetLoader.SpriteFromMod(this, new Vector2(0.5f, 1f), 28f, "Daniel", "DanielSign.png");
+            spinClone.gameObject.ConvertToPrefab(true);
+
+            for (int i = 0; i < upgradeRoom.basicObjects.Count; i++)
+            {
+                if (upgradeRoom.basicObjects[i].prefab.name == "JohnnySign")
+                {
+                    upgradeRoom.basicObjects[i].prefab = spinClone.transform;
+                }
+            }
+
             Resources.FindObjectsOfTypeAll<SceneObject>().First(x => x.manager.GetType() == typeof(PitstopGameManager)).levelAsset.roomAssetPlacements[1].room = upgradeRoomAsset;
             storeRoomGroup = Resources.FindObjectsOfTypeAll<LevelObject>().First(x => x.name == "Endless1").roomGroup.First(x => x.name == "Store");
             List<RoomGroup> rmGL = currentSceneObject.levelObject.roomGroup.ToList();
@@ -779,7 +798,7 @@ namespace BaldiEndless
                 new WeightedItemObject()
                 {
                     selection = items.FindByEnum(Items.DietBsoda).value,
-                    weight = 50
+                    weight = 52
                 },
                 new WeightedItemObject()
                 {
