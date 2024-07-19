@@ -163,7 +163,7 @@ namespace BaldiEndless
         // once all resources have been loaded
         IEnumerator OnResourcesLoaded()
         {
-            yield return 7;
+            yield return 8;
             yield return "Loading sprites/audio...";
             string myPath = AssetLoader.GetModPath(this);
             string iconPath = Path.Combine(myPath, "UpgradeIcons");
@@ -178,6 +178,19 @@ namespace BaldiEndless
             assetManager.Add("TimeSlow", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeSlow.wav"), "Sfx_TimeSlow", SoundType.Effect, Color.blue));
             assetManager.Add("TimeFast", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Effects", "TimeFastFast.wav"), "Sfx_TimeFast", SoundType.Effect, Color.blue));
             assetManager.AddRange<Sprite>(new Sprite[] { AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes4.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes5.png"), 1f), AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Tubes6.png"), 1f) }, new string[] { "LifeTubes4", "LifeTubes5", "LifeTubes6" });
+            yield return "Loading Daniel Assets...";
+            assetManager.Add("DanielIdle", AssetLoader.SpriteFromMod(this, Vector2.one/2,28f, "Daniel", "DanielIdle.png"));
+            assetManager.Add("DanielTalk1", AssetLoader.SpriteFromMod(this, Vector2.one / 2, 28f, "Daniel", "DanielTalk1.png"));
+            assetManager.Add("DanielTalk2", AssetLoader.SpriteFromMod(this, Vector2.one / 2, 28f, "Daniel", "DanielTalk2.png"));
+            assetManager.Add("DanielTalk3", AssetLoader.SpriteFromMod(this, Vector2.one / 2, 28f, "Daniel", "DanielTalk3.png"));
+            Color newC = new Color(156f/255f, 10f/255f, 9f);
+            assetManager.Add("AudDanielFirstEnc", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Daniel", "Lines", "FirstEncounter.wav"), "Dan_FirstEnc", SoundType.Voice, newC));
+            assetManager.Add("AudDanielGreeting", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Daniel", "Lines", "Greeting.wav"), "Dan_Greeting", SoundType.Voice, newC));
+            assetManager.Add("AudDanielBuy1", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Daniel", "Lines", "Buy1.wav"), "Dan_Buy1", SoundType.Voice, newC));
+            assetManager.Add("AudDanielBuy2", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Daniel", "Lines", "Buy2.wav"), "Dan_Buy2", SoundType.Voice, newC));
+            assetManager.Add("AudDanielBuy3", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Daniel", "Lines", "Buy3.wav"), "Dan_Buy3", SoundType.Voice, newC));
+            assetManager.Add("AudDanielFail1", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Daniel", "Lines", "Fail1.wav"), "Dan_Fail1", SoundType.Voice, newC));
+            assetManager.Add("AudDanielFail2", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Daniel", "Lines", "Fail2.wav"), "Dan_Fail2", SoundType.Voice, newC));
             yield return "Adding Items/Upgrades...";
             Texture2D presentTex = AssetLoader.TextureFromMod(this, "PresentIcon_Large.png");
             Sprite presentSprite = AssetLoader.SpriteFromTexture2D(presentTex, Vector2.one / 2, 50f);

@@ -104,6 +104,19 @@ namespace BaldiEndless.Patches
     }
 
     [HarmonyPatch(typeof(Pickup))]
+    [HarmonyPatch("Clicked")]
+    class PickupClickedPatch
+    {
+        static bool Prefix(Pickup __instance, int player)
+        {
+            if (__instance.GetComponent<UpgradePickupMarker>() == null) return true;
+            StandardUpgrade upg = __instance.GetComponent<UpgradePickupMarker>().upgrade;
+            if (EndlessFloorsPlugin.currentSave.CanPurchaseUpgrade(upg, upg.behavior)) return true;
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Pickup))]
     [HarmonyPatch("ClickableSighted")]
     class PickupSightedPatch
     {

@@ -1,6 +1,8 @@
 ﻿using BaldiEndless.Patches;
 using HarmonyLib;
 using MTM101BaldAPI;
+using MTM101BaldAPI.Components;
+using MTM101BaldAPI.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,6 +31,8 @@ namespace BaldiEndless
         private Dictionary<int, float> discounts = new Dictionary<int, float>();
         private bool[] purchasedItems = new bool[0];
 
+        private bool hasGreeted = false;
+
         public Transform roomBase;
         public Transform johnnyBase;
 
@@ -46,10 +50,53 @@ namespace BaldiEndless
             UpdateAllTags();
         }
 
+        private void ItemPurchased(Pickup pickup, int player)
+        {
+            if (audMan.QueuedUp) return;
+            audMan.QueueRandomAudio(succesfulPurchase);
+        }
+
+        private void ItemDenied(Pickup pickup, int player)
+        {
+            if (audMan.QueuedUp) return;
+            audMan.QueueRandomAudio(failedPurchase);
+        }
+
+        PropagatedAudioManager audMan;
+        CustomSpriteAnimator animator;
+        CustomVolumeAnimator volumeAnimator;
+
+        SoundObject initialGreeting;
+        SoundObject greeting;
+        SoundObject[] succesfulPurchase = new SoundObject[3];
+        SoundObject[] failedPurchase = new SoundObject[3];
+
         public override void Initialize(RoomController room)
         {
             base.Initialize(room);
+
+            initialGreeting = EndlessFloorsPlugin.Instance.assetManager.Get<SoundObject>("AudDanielFirstEnc");
+            greeting = EndlessFloorsPlugin.Instance.assetManager.Get<SoundObject>("AudDanielGreeting");
+            succesfulPurchase = new SoundObject[3] { EndlessFloorsPlugin.Instance.assetManager.Get<SoundObject>("AudDanielBuy1"), EndlessFloorsPlugin.Instance.assetManager.Get<SoundObject>("AudDanielBuy2"), EndlessFloorsPlugin.Instance.assetManager.Get<SoundObject>("AudDanielBuy3") };
+            failedPurchase = new SoundObject[2] { EndlessFloorsPlugin.Instance.assetManager.Get<SoundObject>("AudDanielFail1"), EndlessFloorsPlugin.Instance.assetManager.Get<SoundObject>("AudDanielFail2") };
+
             roomBase.SetParent(room.objectObject.transform);
+            Destroy(johnnyBase.GetComponent<Animator>());
+            Destroy(johnnyBase.GetComponent<PropagatedAudioManagerAnimator>());
+            Destroy(johnnyBase.Find("Mouth").gameObject);
+            audMan = johnnyBase.gameObject.AddComponent<PropagatedAudioManager>();
+            audMan.ReflectionSetVariable("maxDistance", 200f); // im lazy i shouldnt be using this
+            johnnyBase.GetComponent<SpriteRenderer>().sprite = EndlessFloorsPlugin.Instance.assetManager.Get<Sprite>("DanielIdle");
+            volumeAnimator = johnnyBase.gameObject.AddComponent<CustomVolumeAnimator>();
+            animator = johnnyBase.gameObject.AddComponent<CustomSpriteAnimator>();
+            animator.animations.Add("Idle", new CustomAnimation<Sprite>(new Sprite[] { EndlessFloorsPlugin.Instance.assetManager.Get<Sprite>("DanielIdle") }, 1f));
+            animator.animations.Add("Talk1", new CustomAnimation<Sprite>(new Sprite[] { EndlessFloorsPlugin.Instance.assetManager.Get<Sprite>("DanielTalk1") }, 0.25f));
+            animator.animations.Add("Talk2", new CustomAnimation<Sprite>(new Sprite[] { EndlessFloorsPlugin.Instance.assetManager.Get<Sprite>("DanielTalk2") }, 0.25f));
+            animator.animations.Add("Talk3", new CustomAnimation<Sprite>(new Sprite[] { EndlessFloorsPlugin.Instance.assetManager.Get<Sprite>("DanielTalk3") }, 0.25f));
+            animator.spriteRenderer = johnnyBase.GetComponent<SpriteRenderer>();
+            volumeAnimator.animator = animator;
+            volumeAnimator.audioSource = audMan.audioDevice;
+            volumeAnimator.animations = new string[] { "Idle", "Talk1", "Talk2", "Talk3" };
             johnnyBase.gameObject.SetActive(true);
             foreach (Door door in this.room.doors)
             {
@@ -60,8 +107,8 @@ namespace BaldiEndless
             {
                 ItemSpawnPoint itemSpawnPoint = room.itemSpawnPoints[i];
                 Pickup pickup = room.ec.CreateItem(room, Singleton<CoreGameManager>.Instance.NoneItem, itemSpawnPoint.position);
-                //pickup.OnItemPurchased += this.ItemPurchased;
-                //pickup.OnItemDenied += this.ItemDenied;
+                pickup.OnItemPurchased += this.ItemPurchased;
+                pickup.OnItemDenied += this.ItemDenied;
                 pickup.OnItemCollected += this.ItemCollected;
                 pickup.showDescription = true;
                 pickups.Add(pickup);
@@ -202,6 +249,11 @@ namespace BaldiEndless
         public override void OnPlayerEnter(PlayerManager player)
         {
             Singleton<CoreGameManager>.Instance.GetHud(player.playerNumber).PointsAnimator.ShowDisplay(true);
+            if (!hasGreeted)
+            {
+                hasGreeted = true;
+                audMan.QueueAudio(initialGreeting);
+            }
         }
 
         public override void OnPlayerExit(PlayerManager player)

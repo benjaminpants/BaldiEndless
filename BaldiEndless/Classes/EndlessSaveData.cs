@@ -70,6 +70,42 @@ namespace BaldiEndless
             }
         }
 
+        public bool CanPurchaseUpgrade(StandardUpgrade upgrade, UpgradePurchaseBehavior behavior)
+        {
+            switch (behavior)
+            {
+                case UpgradePurchaseBehavior.IncrementCounter:
+                    if (!Counters.ContainsKey(upgrade.id))
+                    {
+                        return true;
+                    }
+                    if (Counters[upgrade.id] == byte.MaxValue)
+                    {
+                        return false;
+                    }
+                    return true;
+                case UpgradePurchaseBehavior.Nothing:
+                    return true;
+                case UpgradePurchaseBehavior.FillUpgradeSlot:
+                    for (int i = 0; i < Upgrades.Length; i++)
+                    {
+                        if (Upgrades[i].id == upgrade.id)
+                        {
+                            return true;
+                        }
+                    }
+                    for (int i = 0; i < Upgrades.Length; i++)
+                    {
+                        if (Upgrades[i].id == "none")
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+            }
+            throw new NotImplementedException("Not Implemented:" + behavior.ToString());
+        }
+
         public bool PurchaseUpgrade(StandardUpgrade upgrade, UpgradePurchaseBehavior behavior)
         {
             switch (behavior)
